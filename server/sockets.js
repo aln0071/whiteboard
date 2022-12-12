@@ -29,7 +29,12 @@ function noFail(fn) {
 }
 
 function startIO(app) {
-  io = iolib(app);
+  io = iolib(app, {
+    cors: {
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST"]
+    }
+  });
   if (config.AUTH_SECRET_KEY) {
     // Middleware to check for valid jwt
     io.use(function(socket, next) {
