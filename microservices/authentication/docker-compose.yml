@@ -1,0 +1,16 @@
+version: '3'
+services:
+  authentication:
+    image: authentication
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: authentication
+    volumes:
+      - ./src:/app/src:z
+    ports:
+      - "3001:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    restart: always

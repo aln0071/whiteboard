@@ -1,0 +1,17 @@
+version: '3'
+services:
+
+  frontend:
+    image: frontend
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: frontend
+    volumes:
+      - ./src:/app/src:z
+      - ./webpack.config.js:/app/webpack.config.js:z
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
