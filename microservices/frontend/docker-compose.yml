@@ -10,6 +10,7 @@ services:
     volumes:
       - ./src:/app/src:z
       - ./webpack.config.js:/app/webpack.config.js:z
+      - ./package.json:/app/package.json:z
     ports:
       - "3000:3000"
     environment:
