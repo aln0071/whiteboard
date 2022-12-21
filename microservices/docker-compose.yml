@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   frontend:
     image: frontend
@@ -11,8 +11,8 @@ services:
       - ./frontend/webpack.config.js:/app/webpack.config.js:z
       - ./frontend/package.json:/app/package.json:z
       - ./frontend/package-lock.json:/app/package-lock.json:z
-    ports:
-      - "3000:3000"
+    # ports:
+    #   - "3000:3000"
     environment:
       - PORT=3000
       - NODE_ENV=development
@@ -27,11 +27,21 @@ services:
       - ./authentication/src:/app/src:z
       - ./authentication/package.json:/app/package.json:z
       - ./authentication/package-lock.json:/app/package-lock.json:z
+      - ./app-models:/app-models:z
     ports:
       - "3001:3000"
+    depends_on:
+      - mongodb
     environment:
       - PORT=3000
       - NODE_ENV=development
+      - MONGO_DB_URI=mongodb://mongodb/data
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    container_name: mongodb
 
   nginx:
     image: nginx:latest
