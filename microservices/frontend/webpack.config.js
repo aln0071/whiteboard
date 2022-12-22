@@ -34,6 +34,7 @@ module.exports = {
         //     publicPath: "http://nginx/dist",
         // },
         allowedHosts: 'frontend',
-        hot: true
+        hot: true,
+        historyApiFallback: true
     }
 };

@@ -11,8 +11,8 @@ services:
       - ./frontend/webpack.config.js:/app/webpack.config.js:z
       - ./frontend/package.json:/app/package.json:z
       - ./frontend/package-lock.json:/app/package-lock.json:z
-    # ports:
-    #   - "3000:3000"
+    ports:
+      - "3000:3000"
     environment:
       - PORT=3000
       - NODE_ENV=development

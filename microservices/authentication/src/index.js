@@ -38,7 +38,9 @@ app.post('/api/v1/authentication/register', async (req, res, next) => {
         user.username = username;
         user.password = hashedPassword;
         await user.save();
-        res.status(201).send(users);
+        res.status(201).send({
+            msg: 'User registered!'
+        });
     } catch (error) {
         next(error);
     }
