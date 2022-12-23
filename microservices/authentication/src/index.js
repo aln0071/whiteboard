@@ -31,7 +31,7 @@ app.post('/api/v1/authentication/register', async (req, res, next) => {
             res.status(400).json({
                 error: "Username in use"
             })
-            next();
+            return next();
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new UserModel();
@@ -54,7 +54,7 @@ app.post('/api/v1/authentication/login', async (req, res, next) => {
             res.status(404).json({
                 error: "User does not exist!"
             });
-            next();
+            return next();
         }
         if (await bcrypt.compare(password, user.password)) {
             const accessToken = generateAccessToken({
