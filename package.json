@@ -19,6 +19,7 @@
   },
   "scripts": {
     "start": "node ./server/server.js",
+    "start:dev": "npx nodemon ./server/server.js",
     "test": "nightwatch tests && nightwatch tests --env jwt"
   },
   "main": "./server/server.js",

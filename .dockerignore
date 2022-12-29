@@ -12,3 +12,5 @@ docker-compose.yml
 .git
 .github
 .gitignore
+microservices
+.vscode

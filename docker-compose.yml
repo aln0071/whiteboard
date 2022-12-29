@@ -1,8 +1,13 @@
 version: '3'
 services:
   www:
+    container_name: whiteboard
     volumes:
       - /opt/app/server-data:/opt/app/server-data
+      - ./server:/opt/app/server:z
+      - ./client-data:/opt/app/client-data:z
+      - ./package.json:/opt/app/package.json:z
+      - ./package-lock.json:/opt/app/package-lock.json:z
     ports:
       - '80:80'
     build:
@@ -15,3 +20,58 @@ services:
         max_attempts: 5
         window: 60s
 
+  frontend:
+    image: frontend
+    build:
+      context: ./microservices/frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    volumes:
+      - ./microservices/frontend/src:/app/src:z
+      - ./microservices/frontend/webpack.config.js:/app/webpack.config.js:z
+      - ./microservices/frontend/package.json:/app/package.json:z
+      - ./microservices/frontend/package-lock.json:/app/package-lock.json:z
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+
+  authentication:
+    image: authentication
+    build:
+      context: ./microservices/authentication
+      dockerfile: Dockerfile
+    container_name: authentication
+    volumes:
+      - ./microservices/authentication/src:/app/src:z
+      - ./microservices/authentication/package.json:/app/package.json:z
+      - ./microservices/authentication/package-lock.json:/app/package-lock.json:z
+      - ./microservices/app-models:/app-models:z
+    ports:
+      - "3001:3000"
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - MONGO_DB_URI=mongodb://mongodb/data
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    container_name: mongodb
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "2000:8080"
+    container_name: nginx
+    volumes:
+      - ./microservices/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./microservices/nginx/proxy_headers.conf:/etc/nginx/proxy_headers.conf
+    depends_on:
+      - frontend
+      - authentication
+      - www
