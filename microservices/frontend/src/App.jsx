@@ -1,49 +1,63 @@
 import React, { Component } from "react";
 import "./App.css";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer, toast } from 'react-toastify';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer, toast } from "react-toastify";
 import Login from "./components/login";
 import {
   createBrowserRouter,
   RouterProvider,
-  redirect
+  redirect,
 } from "react-router-dom";
 import Register from "./components/register";
 import PublicDashboard from "./components/public-dashboard";
 import PrivateDashboard from "./components/private-dashboard";
+import axios from "axios";
+import { URLS } from "./utils";
+
+const publicPathLoader = async () => {
+    try {
+      const isLoggedIn = await axios.post(URLS.IS_LOGGED_IN);
+      return redirect("/private/dashboard")
+    } catch(error) {
+      return null;
+    }
+  }
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <PublicDashboard />,
+    loader: publicPathLoader
   },
   {
     path: "/login",
-    element: <Login />
+    element: <Login />,
+    loader: publicPathLoader
   },
   {
-    path: '/register',
-    element: <Register />
+    path: "/register",
+    element: <Register />,
+    loader: publicPathLoader
   },
   {
-    path: '/private',
+    path: "/private",
     loader: async () => {
-      const accessToken = window.localStorage.getItem('accessToken')
-      if(accessToken === undefined || accessToken === null) {
-        toast.info('Please login')
-        return redirect('/')
-      } else {
-        return accessToken;
+      try {
+        const isLoggedIn = await axios.post(URLS.IS_LOGGED_IN);
+      } catch (error) {
+        toast.info("Please login");
+        return redirect("/");
       }
+      return null;
     },
     children: [
       {
-        path: 'dashboard',
-        element: <PrivateDashboard />
-      }
-    ]
-  }
+        path: "dashboard",
+        element: <PrivateDashboard />,
+      },
+    ],
+  },
 ]);
 
 class App extends Component {

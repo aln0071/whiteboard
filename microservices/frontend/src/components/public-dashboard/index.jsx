@@ -11,6 +11,5 @@ export default function PublicDashboard() {
         <br/>
         <Button variant="primary" onClick={() => navigate('/login')}>Login</Button>{'  '}
         <Button variant="primary" onClick={() => navigate('/register')}>Register</Button>{'  '}
-        <Button variant="primary">Anonymous Whiteboard</Button>
     </div>
 }

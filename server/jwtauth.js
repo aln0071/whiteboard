@@ -30,15 +30,14 @@ jsonwebtoken = require("jsonwebtoken");
 const {roleInBoard} = require("./jwtBoardnameAuth");
 /**
  * Validates jwt and returns whether user is a moderator
- * @param {URL} url
+ * @param {String} token
  * @returns {boolean} - True if user is a moderator, else false
  * @throws {Error} - If no token is provided when it should be
  */
-function checkUserPermission(url) {
+function checkUserPermission(token) {
   var isModerator = false;
   if (config.AUTH_SECRET_KEY != "") {
-    var token = url.searchParams.get("token");
-    if (token) {
+    if (token !== null) {
       isModerator = roleInBoard(token) === "moderator";
     } else {
       // Error out as no token provided
@@ -48,5 +47,19 @@ function checkUserPermission(url) {
   return isModerator;
 }
 
+function getJwtTokenFromCookie(request) {
+  const cookies = request.headers.cookie;
+  let jwtToken = null;
+  if(cookies) {
+    cookies.split(';').forEach(cookie => {
+      const [key, value] = cookie.split(/=(.*)/s);
+      if(String(key).trim() === 'jwtToken') {
+        jwtToken = String(value).trim();
+      }
+    })
+  }
+  return jwtToken;
+}
 
-module.exports = { checkUserPermission };
+
+module.exports = { checkUserPermission, getJwtTokenFromCookie };

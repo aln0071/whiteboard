@@ -30,14 +30,13 @@ config = require("./configuration.js"),
 /**
  * This function checks if a board name is set in the roles claim.
  * Returns true of the board name is set in the JWT and the board name matches the board name in the URL
- * @param {string} url
+ * @param {string} token
  * @param {string} boardNameIn
  @returns {boolean} - True if user does not have the role forbidden false if the user hase the role forbidden
  @throws {Error} - If no boardname match
  */
 
-function checkBoardnameInToken(url, boardNameIn) {
-    var token = url.searchParams.get("token");
+function checkBoardnameInToken(token, boardNameIn) {
     if (roleInBoard(token, boardNameIn) === 'forbidden') {
         throw new Error("Acess Forbidden");
     }

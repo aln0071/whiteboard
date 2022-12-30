@@ -1,3 +1,5 @@
+const { getJwtTokenFromCookie } = require("./jwtauth.js");
+
 var iolib = require("socket.io"),
   { log, gauge, monitorFunction } = require("./log.js"),
   BoardData = require("./boardData.js").BoardData,
@@ -33,8 +35,9 @@ function startIO(app) {
   if (config.AUTH_SECRET_KEY) {
     // Middleware to check for valid jwt
     io.use(function(socket, next) {
-      if(socket.handshake.query && socket.handshake.query.token) {
-        jsonwebtoken.verify(socket.handshake.query.token, config.AUTH_SECRET_KEY, function(err, decoded) {
+      const jwtToken = getJwtTokenFromCookie(socket.handshake);
+      if(jwtToken !== null) {
+        jsonwebtoken.verify(jwtToken, config.AUTH_SECRET_KEY, function(err, decoded) {
           if(err) return next(new Error("Authentication error: Invalid JWT"));
           next();
         })

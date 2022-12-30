@@ -23,7 +23,7 @@ function Register() {
       const response = await axios.post(URLS.REGISTER, {
         ...data,
       });
-      if (response.status === 200) {
+      if (response.status === 201) {
         toast.success(response.data.msg);
         setData({
             email: '',

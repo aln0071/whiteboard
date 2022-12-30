@@ -76,8 +76,15 @@ function handler(request, response) {
     handleRequestAndLog(request, response);
   } catch (err) {
     console.trace(err);
-    response.writeHead(500, { "Content-Type": "text/plain" });
-    response.end(err.toString());
+    if(err.message === 'No token provided') {
+      response.writeHead(302, {
+        'Location': '/login'
+      })
+      response.end();
+    } else {
+      response.writeHead(500, { "Content-Type": "text/plain" });
+      response.end(err.toString());
+    }
   }
 }
 
@@ -111,8 +118,9 @@ function handleRequest(request, response) {
   var staticResources = ['.js','.css', '.svg', '.ico', '.png', '.jpg', 'gif'];
   // If we're not being asked for a file, then we should check permissions.
   var isModerator = false;
+  const jwtToken = jwtauth.getJwtTokenFromCookie(request);
   if(!staticResources.includes(fileExt)) {
-    isModerator = jwtauth.checkUserPermission(parsedUrl);
+    isModerator = jwtauth.checkUserPermission(jwtToken);
   }
 
   switch (parts[0]) {
@@ -121,13 +129,13 @@ function handleRequest(request, response) {
       if (parts.length === 1) {
         // '/boards?board=...' This allows html forms to point to boards
         var boardName = parsedUrl.searchParams.get("board") || "anonymous";
-        jwtBoardName.checkBoardnameInToken(parsedUrl, boardName);
+        jwtBoardName.checkBoardnameInToken(jwtToken, boardName);
         var headers = { Location: "boards/" + encodeURIComponent(boardName) };
         response.writeHead(301, headers);
         response.end();
       } else if (parts.length === 2 && parsedUrl.pathname.indexOf(".") === -1) {
         var boardName = validateBoardName(parts[1]);
-        jwtBoardName.checkBoardnameInToken(parsedUrl, boardName);
+        jwtBoardName.checkBoardnameInToken(jwtToken, boardName);
         boardTemplate.serve(request, response, isModerator);
         // If there is no dot and no directory, parts[1] is the board name
       } else {

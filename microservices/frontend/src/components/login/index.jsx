@@ -26,8 +26,7 @@ function Login() {
         ...data,
       });
       if (response.status === 200) {
-        const { accessToken } = response.data;
-        window.localStorage.setItem('accessToken', accessToken);
+        const userDetails = response.data;
         toast.success("Login success!");
         navigate('/private/dashboard')
       } else {

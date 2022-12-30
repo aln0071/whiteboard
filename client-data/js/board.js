@@ -71,9 +71,9 @@ Tools.connect = function () {
 		"reconnectionDelay": 100, //Make the xhr connections as fast as possible
 		"timeout": 1000 * 60 * 20 // Timeout after 20 minutes
 	}
-	if(params.has("token")) {
-		socket_params.query = "token=" + params.get("token");
-	}
+	// if(params.has("token")) {
+	// 	socket_params.query = "token=" + params.get("token");
+	// }
 
 	this.socket = io.connect('', socket_params);
 
@@ -98,9 +98,11 @@ Tools.boardName = (function () {
 })();
 
 Tools.token = (function() {
-	var url = new URL(window.location);
-	var params = new URLSearchParams(url.search);
-	return params.get("token");
+	// var url = new URL(window.location);
+	// var params = new URLSearchParams(url.search);
+	// return params.get("token");
+	// return window.localStorage.getItem('accessToken')
+	return "hello"
 })();
 
 //Get the board as soon as the page is loaded
