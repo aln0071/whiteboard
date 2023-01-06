@@ -11,11 +11,19 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const secret = "some secret";
 
-const { UserSchema } = require("app-models");
-
-const UserModel = mongoose.model("User", UserSchema);
+const ROUTES = require("./config/routes");
+const setupProxies = require("./config/proxy");
+const setupAuth = require("./config/authMiddleware");
+const {
+  getJwtTokenFromCookie,
+  generateAccessToken,
+  UserModel,
+} = require("./utils");
 
 app.use(express.json());
+
+setupAuth(app, ROUTES);
+setupProxies(app, ROUTES);
 
 app.get("/api/v1/authentication", (req, res) => {
   res.json({
@@ -28,8 +36,6 @@ app.post("/api/v1/authentication/register", async (req, res, next) => {
     const { email: username, password } = req.body;
     const existingUser = await UserModel.findOne({ username });
     if (existingUser !== null) {
-      console.log("username: ", username);
-      console.log(existingUser);
       res.status(400).json({
         error: "Username in use",
       });
@@ -62,7 +68,6 @@ app.post("/api/v1/authentication/login", async (req, res, next) => {
     if (await bcrypt.compare(password, user.password)) {
       const accessToken = generateAccessToken({
         _id: user._id,
-        username: user.username,
       });
       res.cookie("jwtToken", accessToken, {
         secure: true,
@@ -86,8 +91,8 @@ app.post("/api/v1/authentication/login", async (req, res, next) => {
 app.post("/api/v1/authentication/logout", (req, res) => {
   res.clearCookie("jwtToken");
   res.json({
-    redirectURL: '/'
-  })
+    redirectURL: "/",
+  });
   res.end();
 });
 
@@ -96,29 +101,11 @@ app.post("/api/v1/authentication/isLoggedIn", async (req, res, next) => {
   try {
     const decodedToken = await jwt.verify(jwtToken, secret);
     res.sendStatus(200);
-  } catch(error) {
-    next(error)
+  } catch (error) {
+    next(error);
   }
   next();
 });
-
-function generateAccessToken(user) {
-  return jwt.sign(user, secret, { expiresIn: "15m" });
-}
-
-function getJwtTokenFromCookie(request) {
-  const cookies = request.headers.cookie;
-  let jwtToken = null;
-  if (cookies) {
-    cookies.split(";").forEach((cookie) => {
-      const [key, value] = cookie.split(/=(.*)/s);
-      if (String(key).trim() === "jwtToken") {
-        jwtToken = String(value).trim();
-      }
-    });
-  }
-  return jwtToken;
-}
 
 app.use((err, req, res, next) => {
   res.status(500);

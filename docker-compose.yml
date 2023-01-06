@@ -56,6 +56,26 @@ services:
       - PORT=3000
       - NODE_ENV=development
       - MONGO_DB_URI=mongodb://mongodb/data
+  
+  board:
+    image: board
+    build:
+      context: ./microservices/board
+      dockerfile: Dockerfile
+    container_name: board
+    volumes:
+      - ./microservices/board/src:/app/src:z
+      - ./microservices/board/package.json:/app/package.json:z
+      - ./microservices/board/package-lock.json:/app/package-lock.json:z
+      - ./microservices/app-models:/app-models:z
+    ports:
+      - "3002:3000"
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - MONGO_DB_URI=mongodb://mongodb/data
 
   mongodb:
     image: mongo
@@ -75,3 +95,4 @@ services:
       - frontend
       - authentication
       - www
+      - board

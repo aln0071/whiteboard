@@ -1,6 +1,7 @@
-const {UserModel, UserSchema} = require('./models/user')
+const UserSchema = require('./schemas/user')
+const BoardSchema = require('./schemas/board')
 
 module.exports = {
-    UserModel,
-    UserSchema
+    UserSchema,
+    BoardSchema
 }
