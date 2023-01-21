@@ -1,7 +1,7 @@
 /**
  *                        WHITEBOPHIR
  *********************************************************
- * @licstart  The following is the entire license notice for the 
+ * @licstart  The following is the entire license notice for the
  *  JavaScript code in this page.
  *
  * Copyright (C) 2013  Ophir LOJKINE
@@ -24,10 +24,9 @@
  * @licend
  */
 
-
-config = require("./configuration.js"),
-jsonwebtoken = require("jsonwebtoken");
-const {roleInBoard} = require("./jwtBoardnameAuth");
+(config = require("./configuration.js")),
+  (jsonwebtoken = require("jsonwebtoken"));
+const { roleInBoard } = require("./jwtBoardnameAuth");
 /**
  * Validates jwt and returns whether user is a moderator
  * @param {String} token
@@ -50,16 +49,25 @@ function checkUserPermission(token) {
 function getJwtTokenFromCookie(request) {
   const cookies = request.headers.cookie;
   let jwtToken = null;
-  if(cookies) {
-    cookies.split(';').forEach(cookie => {
+  if (cookies) {
+    cookies.split(";").forEach((cookie) => {
       const [key, value] = cookie.split(/=(.*)/s);
-      if(String(key).trim() === 'jwtToken') {
+      if (String(key).trim() === "jwtToken") {
         jwtToken = String(value).trim();
       }
-    })
+    });
   }
   return jwtToken;
 }
 
+function getBoardName(request) {
+  const referer = request.headers.referer;
+  let boardName = null;
+  if (typeof referer === "string") {
+    const regex = /\/wbo\/boards\/([\w%\-_~()]*$)$/g;
+    referer.match(regex);
+  }
+  return boardName;
+}
 
-module.exports = { checkUserPermission, getJwtTokenFromCookie };
+module.exports = { checkUserPermission, getJwtTokenFromCookie, getBoardName };

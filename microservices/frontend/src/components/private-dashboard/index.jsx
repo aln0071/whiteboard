@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../utils";
 import Form from "react-bootstrap/Form";
+import BoardsList from "./boards-list";
 
 export default function PrivateDashboard() {
   const navigate = useNavigate();
@@ -57,6 +58,8 @@ export default function PrivateDashboard() {
           </Button>
         </Form>
       </div>
+      <hr />
+      <BoardsList />
       <hr />
       <Button variant="primary" onClick={() => {}}>
         Create Random Whiteboard

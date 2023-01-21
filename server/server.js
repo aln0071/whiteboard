@@ -1,6 +1,6 @@
 var app = require("http").createServer(handler),
   sockets = require("./sockets.js"),
-  {log, monitorFunction} = require("./log.js"),
+  { log, monitorFunction } = require("./log.js"),
   path = require("path"),
   fs = require("fs"),
   crypto = require("crypto"),
@@ -11,7 +11,8 @@ var app = require("http").createServer(handler),
   polyfillLibrary = require("polyfill-library"),
   check_output_directory = require("./check_output_directory.js"),
   jwtauth = require("./jwtauth.js");
-  jwtBoardName = require("./jwtBoardnameAuth.js");
+jwtBoardName = require("./jwtBoardnameAuth.js");
+axios = require("axios");
 
 var MIN_NODE_VERSION = 10.0;
 
@@ -76,10 +77,10 @@ function handler(request, response) {
     handleRequestAndLog(request, response);
   } catch (err) {
     console.trace(err);
-    if(err.message === 'No token provided') {
+    if (err.message === "No token provided") {
       response.writeHead(302, {
-        'Location': '/login'
-      })
+        Location: "/login",
+      });
       response.end();
     } else {
       response.writeHead(500, { "Content-Type": "text/plain" });
@@ -108,18 +109,19 @@ function validateBoardName(boardName) {
 /**
  * @type {import('http').RequestListener}
  */
-function handleRequest(request, response) {
-  var parsedUrl = new URL(request.url, 'http://wbo/');
+async function handleRequest(request, response) {
+  var parsedUrl = new URL(request.url, "http://wbo/");
   var parts = parsedUrl.pathname.split("/");
 
   if (parts[0] === "") parts.shift();
 
   var fileExt = path.extname(parsedUrl.pathname);
-  var staticResources = ['.js','.css', '.svg', '.ico', '.png', '.jpg', 'gif'];
+  var staticResources = [".js", ".css", ".svg", ".ico", ".png", ".jpg", "gif"];
   // If we're not being asked for a file, then we should check permissions.
   var isModerator = false;
+  let isViewer = false;
   const jwtToken = jwtauth.getJwtTokenFromCookie(request);
-  if(!staticResources.includes(fileExt)) {
+  if (!staticResources.includes(fileExt)) {
     isModerator = jwtauth.checkUserPermission(jwtToken);
   }
 
@@ -136,7 +138,8 @@ function handleRequest(request, response) {
       } else if (parts.length === 2 && parsedUrl.pathname.indexOf(".") === -1) {
         var boardName = validateBoardName(parts[1]);
         jwtBoardName.checkBoardnameInToken(jwtToken, boardName);
-        boardTemplate.serve(request, response, isModerator);
+        const role = request.headers.role;
+        boardTemplate.serve(request, response, role);
         // If there is no dot and no directory, parts[1] is the board name
       } else {
         request.url = "/" + parts.slice(1).join("/");
@@ -145,51 +148,51 @@ function handleRequest(request, response) {
       break;
 
     case "download":
-        var boardName = validateBoardName(parts[1]),
-          history_file = path.join(
-            config.HISTORY_DIR,
-            "board-" + boardName + ".json"
-          );
-        jwtBoardName.checkBoardnameInToken(parsedUrl, boardName);
-        if (parts.length > 2 && /^[0-9A-Za-z.\-]+$/.test(parts[2])) {
-          history_file += "." + parts[2] + ".bak";
-        }
-        log("download", { file: history_file });
-        fs.readFile(history_file, function (err, data) {
-          if (err) return serveError(request, response)(err);
-          response.writeHead(200, {
-            "Content-Type": "application/json",
-            "Content-Disposition": 'attachment; filename="' + boardName + '.wbo"',
-            "Content-Length": data.length,
-          });
-          response.end(data);
+      var boardName = validateBoardName(parts[1]),
+        history_file = path.join(
+          config.HISTORY_DIR,
+          "board-" + boardName + ".json"
+        );
+      jwtBoardName.checkBoardnameInToken(parsedUrl, boardName);
+      if (parts.length > 2 && /^[0-9A-Za-z.\-]+$/.test(parts[2])) {
+        history_file += "." + parts[2] + ".bak";
+      }
+      log("download", { file: history_file });
+      fs.readFile(history_file, function (err, data) {
+        if (err) return serveError(request, response)(err);
+        response.writeHead(200, {
+          "Content-Type": "application/json",
+          "Content-Disposition": 'attachment; filename="' + boardName + '.wbo"',
+          "Content-Length": data.length,
         });
+        response.end(data);
+      });
       break;
 
     case "export":
     case "preview":
-        var boardName = validateBoardName(parts[1]),
-          history_file = path.join(
-            config.HISTORY_DIR,
-            "board-" + boardName + ".json"
-          );
-        jwtBoardName.checkBoardnameInToken(parsedUrl, boardName);
-        response.writeHead(200, {
-          "Content-Type": "image/svg+xml",
-          "Content-Security-Policy": CSP,
-          "Cache-Control": "public, max-age=30",
+      var boardName = validateBoardName(parts[1]),
+        history_file = path.join(
+          config.HISTORY_DIR,
+          "board-" + boardName + ".json"
+        );
+      jwtBoardName.checkBoardnameInToken(parsedUrl, boardName);
+      response.writeHead(200, {
+        "Content-Type": "image/svg+xml",
+        "Content-Security-Policy": CSP,
+        "Cache-Control": "public, max-age=30",
+      });
+      var t = Date.now();
+      createSVG
+        .renderBoard(history_file, response)
+        .then(function () {
+          log("preview", { board: boardName, time: Date.now() - t });
+          response.end();
+        })
+        .catch(function (err) {
+          log("error", { error: err.toString(), stack: err.stack });
+          response.end("<text>Sorry, an error occured</text>");
         });
-        var t = Date.now();
-        createSVG
-          .renderBoard(history_file, response)
-          .then(function () {
-            log("preview", { board: boardName, time: Date.now() - t });
-            response.end();
-          })
-          .catch(function (err) {
-            log("error", { error: err.toString(), stack: err.stack });
-            response.end("<text>Sorry, an error occured</text>");
-          });
       break;
 
     case "random":
@@ -231,7 +234,7 @@ function handleRequest(request, response) {
 
     case "": // Index page
       logRequest(request);
-        indexTemplate.serve(request, response);
+      indexTemplate.serve(request, response);
       break;
 
     default:

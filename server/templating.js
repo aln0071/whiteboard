@@ -19,6 +19,33 @@ handlebars.registerHelper({
   json: JSON.stringify.bind(JSON),
 });
 
+handlebars.registerHelper("ifCond", function (v1, operator, v2, options) {
+  switch (operator) {
+    case "==":
+      return v1 == v2 ? options.fn(this) : options.inverse(this);
+    case "===":
+      return v1 === v2 ? options.fn(this) : options.inverse(this);
+    case "!=":
+      return v1 != v2 ? options.fn(this) : options.inverse(this);
+    case "!==":
+      return v1 !== v2 ? options.fn(this) : options.inverse(this);
+    case "<":
+      return v1 < v2 ? options.fn(this) : options.inverse(this);
+    case "<=":
+      return v1 <= v2 ? options.fn(this) : options.inverse(this);
+    case ">":
+      return v1 > v2 ? options.fn(this) : options.inverse(this);
+    case ">=":
+      return v1 >= v2 ? options.fn(this) : options.inverse(this);
+    case "&&":
+      return v1 && v2 ? options.fn(this) : options.inverse(this);
+    case "||":
+      return v1 || v2 ? options.fn(this) : options.inverse(this);
+    default:
+      return options.inverse(this);
+  }
+});
+
 function findBaseUrl(req) {
   var proto =
     req.headers["X-Forwarded-Proto"] ||
@@ -32,8 +59,9 @@ class Template {
     const contents = fs.readFileSync(path, { encoding: "utf8" });
     this.template = handlebars.compile(contents);
   }
-  parameters(parsedUrl, request, isModerator) {
-    const accept_language_str = parsedUrl.query.lang || request.headers["accept-language"];
+  parameters(parsedUrl, request, role) {
+    const accept_language_str =
+      parsedUrl.query.lang || request.headers["accept-language"];
     const accept_languages = accept_language_parser.parse(accept_language_str);
     const opts = { loose: true };
     let language =
@@ -41,7 +69,8 @@ class Template {
     // The loose matcher returns the first language that partially matches, so we need to
     // check if the preferred language is supported to return it
     if (accept_languages.length > 0) {
-      const preferred_language = accept_languages[0].code + "-" + accept_languages[0].region;
+      const preferred_language =
+        accept_languages[0].code + "-" + accept_languages[0].region;
       if (languages.includes(preferred_language)) {
         language = preferred_language;
       }
@@ -50,12 +79,25 @@ class Template {
     const configuration = client_config || {};
     const prefix = request.url.split("/boards/")[0].substr(1);
     const baseUrl = findBaseUrl(request) + (prefix ? prefix + "/" : "");
-    const moderator = isModerator;
-    return { baseUrl, languages, language, translations, configuration, moderator };
+    const moderator = role === "moderator";
+    const editor = role === "editor";
+    const viewer = role === "viewer";
+    const owner = role === "owner";
+    return {
+      baseUrl,
+      languages,
+      language,
+      translations,
+      configuration,
+      moderator,
+      editor,
+      viewer,
+      owner,
+    };
   }
-  serve(request, response, isModerator) {
+  serve(request, response, role) {
     const parsedUrl = url.parse(request.url, true);
-    const parameters = this.parameters(parsedUrl, request, isModerator);
+    const parameters = this.parameters(parsedUrl, request, role);
     var body = this.template(parameters);
     var headers = {
       "Content-Length": Buffer.byteLength(body),
@@ -71,8 +113,8 @@ class Template {
 }
 
 class BoardTemplate extends Template {
-  parameters(parsedUrl, request, isModerator) {
-    const params = super.parameters(parsedUrl, request, isModerator);
+  parameters(parsedUrl, request, role) {
+    const params = super.parameters(parsedUrl, request, role);
     const parts = parsedUrl.pathname.split("boards/", 2);
     const boardUriComponent = parts[1];
     params["boardUriComponent"] = boardUriComponent;

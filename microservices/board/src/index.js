@@ -34,6 +34,41 @@ app.post("/api/v1/board/create/:boardname", async (req, res, next) => {
   }
 });
 
+app.get("/api/v1/board/getusers/:boardname", async (req, res, next) => {
+  const boardname = req.params.boardname;
+  if (/^[\w%\-_~()]*$/.test(boardname) === false) {
+    return next(new Error("Invalid board name"));
+  }
+  try {
+    const board = await BoardModel.findOne({ name: boardname });
+    if (board === null) {
+      return next(new Error("Board with this name does not exist"));
+    } else {
+      res.json({
+        owner: board.owner,
+        viewers: board.viewers || [],
+        editors: board.editors || [],
+      });
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/v1/board/list", async (req, res, next) => {
+  const userid = req.get("userid");
+  try {
+    const ownBoardsList = await BoardModel.find({ owner: userid }, "name");
+    res.json({
+      ownBoards: ownBoardsList || [],
+    });
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use((err, req, res, next) => {
   if (
     err.message.startsWith(

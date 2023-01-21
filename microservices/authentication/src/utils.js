@@ -22,8 +22,16 @@ function generateAccessToken(user) {
   return jwt.sign(user, secret, { expiresIn: "15m" });
 }
 
+const URLS = {
+  GET_BOARD_ACCESS_DETAILS: `http://board:3000/api/v1/board/getusers/:boardname`,
+};
+
+const getErrorMessage = (error) => error.response?.data?.error || error.message;
+
 module.exports = {
   getJwtTokenFromCookie,
   generateAccessToken,
+  getErrorMessage,
   UserModel,
+  URLS,
 };

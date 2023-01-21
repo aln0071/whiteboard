@@ -82,6 +82,10 @@
 							class="rangeChooser" />
 					</label>
 				</li>
+				<li id="home-button" class="tool" tabindex="-1">
+					<img class="tool-icon" width="60" height="60" src="icon-home.svg" alt="home" />
+					<label class="tool-name">Home</label>
+				</li>
 			</ul>
 		</div>
 	</div>
@@ -108,6 +112,9 @@
 	<script src="../tools/mic/mic.js"></script>
 	{{#moderator}}<script src="../tools/clear/clear.js"></script>{{/moderator}}
 	<script src="../js/canvascolor.js"></script>
+	{{#viewer}}<script src="../js/viewer.js"></script>{{/viewer}}
+	{{#editor}}<script src="../js/editor.js"></script>{{/editor}}
+	{{#owner}}<script src="../js/owner.js"></script>{{/owner}}
 </body>
 
 </html>

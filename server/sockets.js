@@ -34,13 +34,21 @@ function startIO(app) {
   io = iolib(app);
   if (config.AUTH_SECRET_KEY) {
     // Middleware to check for valid jwt
-    io.use(function(socket, next) {
+    io.use(function (socket, next) {
       const jwtToken = getJwtTokenFromCookie(socket.handshake);
-      if(jwtToken !== null) {
-        jsonwebtoken.verify(jwtToken, config.AUTH_SECRET_KEY, function(err, decoded) {
-          if(err) return next(new Error("Authentication error: Invalid JWT"));
-          next();
-        })
+      console.log("new incomming...");
+      // console.log(socket.handshake);
+      // return next(new Error("test error"));
+      if (jwtToken !== null) {
+        jsonwebtoken.verify(
+          jwtToken,
+          config.AUTH_SECRET_KEY,
+          function (err, decoded) {
+            if (err)
+              return next(new Error("Authentication error: Invalid JWT"));
+            next();
+          }
+        );
       } else {
         next(new Error("Authentication error: No jwt provided"));
       }

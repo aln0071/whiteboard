@@ -11,6 +11,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const secret = "some secret";
 
+const axios = require("axios");
+
 const ROUTES = require("./config/routes");
 const setupProxies = require("./config/proxy");
 const setupAuth = require("./config/authMiddleware");
@@ -18,11 +20,51 @@ const {
   getJwtTokenFromCookie,
   generateAccessToken,
   UserModel,
+  URLS,
+  getErrorMessage,
 } = require("./utils");
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log("request received for url: " + req.originalUrl);
+  next();
+});
+
 setupAuth(app, ROUTES);
+
+// additional middlewares
+app.use(/^\/wbo\/boards\/[\w%\-_~()]*$/, async (req, res, next) => {
+  try {
+    const boardname = req.originalUrl.substring(12);
+    if (boardname === "anonymous") {
+      req.headers.role = "owner";
+      return next();
+    }
+    const boardAccessDetails = await axios.get(
+      URLS.GET_BOARD_ACCESS_DETAILS.replace(":boardname", boardname)
+    );
+    if (boardAccessDetails.status !== 200) {
+      return next(new Error(boardAccessDetails.data.error));
+    }
+    const { viewers, editors, owner } = boardAccessDetails.data;
+    const userid = req.get("userid");
+    if (userid === owner) {
+      req.headers.role = "owner";
+    } else if (editors.includes(userid)) {
+      req.headers.role = "editor";
+    } else if (viewers.includes(userid)) {
+      req.headers.role = "viewer";
+    } else {
+      return next(new Error("You are not authorized to access this board"));
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+// end of additional middlewares
+
 setupProxies(app, ROUTES);
 
 app.get("/api/v1/authentication", (req, res) => {
@@ -110,7 +152,7 @@ app.post("/api/v1/authentication/isLoggedIn", async (req, res, next) => {
 app.use((err, req, res, next) => {
   res.status(500);
   console.trace(err);
-  res.json({ error: err.message });
+  res.json({ error: getErrorMessage(err) });
 });
 
 app.listen(port, () =>
