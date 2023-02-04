@@ -8,6 +8,9 @@ ADD . .
 ENV PATH /app/node_modules/.bin:$PATH
 
 CMD npm config set cache-min 9999999 \
+    && cd /app-models \
+    && npm install \
+    && cd /app \
     && npm install \
     && npm start
 
