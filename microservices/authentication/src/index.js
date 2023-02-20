@@ -24,7 +24,7 @@ const {
   getErrorMessage,
 } = require("./utils");
 
-app.use(express.json());
+app.use(/\/api\/v1\/authentication\/.*/, express.json());
 
 app.use((req, res, next) => {
   console.log("request received for url: " + req.originalUrl);

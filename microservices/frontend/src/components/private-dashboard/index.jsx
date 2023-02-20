@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../utils";
 import Form from "react-bootstrap/Form";
 import BoardsList from "./boards-list";
+import crypto from "crypto";
 
 export default function PrivateDashboard() {
   const navigate = useNavigate();
@@ -24,10 +25,9 @@ export default function PrivateDashboard() {
 
   const [boardName, setBoardName] = React.useState("");
 
-  const createWhiteboardWithName = async (e) => {
-    e.preventDefault();
+  const createWhiteboardWithName = async (name) => {
     try {
-      const response = await axios.post(`${URLS.CREATE_BOARD}/${boardName}`);
+      const response = await axios.post(`${URLS.CREATE_BOARD}/${name}`);
       if (response.status === 200) {
         toast.success("Success: board created!");
       }
@@ -36,13 +36,26 @@ export default function PrivateDashboard() {
     }
   };
 
+  const handleWhiteboardNameSubmission = async (e) => {
+    e.preventDefault();
+    createWhiteboardWithName(boardName);
+  };
+
+  const createRandomWhiteboard = () => {
+    const name = crypto
+      .randomBytes(32)
+      .toString("base64")
+      .replace(/[^\w]/g, "-");
+    createWhiteboardWithName(name);
+  };
+
   return (
     <div>
       private dashboard
       <hr />
       <div>
         <h4>Create a board with given name</h4>
-        <Form onSubmit={createWhiteboardWithName}>
+        <Form onSubmit={handleWhiteboardNameSubmission}>
           <Form.Control
             className="me-auto"
             placeholder="Enter board name here"
@@ -61,7 +74,7 @@ export default function PrivateDashboard() {
       <hr />
       <BoardsList />
       <hr />
-      <Button variant="primary" onClick={() => {}}>
+      <Button variant="primary" onClick={() => createRandomWhiteboard()}>
         Create Random Whiteboard
       </Button>
       {"  "}

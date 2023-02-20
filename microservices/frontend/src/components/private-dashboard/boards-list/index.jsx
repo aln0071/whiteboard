@@ -2,10 +2,13 @@ import React from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../../utils";
+import ShareBoard from "../share-board";
 
 export default function BoardsList() {
   const [boardsList, setBoardsList] = React.useState({
     ownBoards: [],
+    editorBoards: [],
+    viewerBoards: [],
   });
   React.useEffect(() => {
     (async () => {
@@ -21,17 +24,33 @@ export default function BoardsList() {
       }
     })();
   }, []);
-  const renderBoardsList = (boards) => {
+  const renderBoardsList = (boards, type = "not-owner") => {
     return boards.map((board) => (
       <li key={board._id}>
         <a href={`/wbo/boards/${board.name}`}>{board.name}</a>
+        {type === "owner" && (
+          <>
+            {`  `}
+            <ShareBoard board={board} />
+          </>
+        )}
       </li>
     ));
   };
   return (
     <div>
       <h4>Own Boards</h4>
-      <ul>{renderBoardsList(boardsList.ownBoards)}</ul>
+      <ul>{renderBoardsList(boardsList.ownBoards, "owner")}</ul>
+      <hr />
+      <h4>Shared With Me</h4>
+      <div style={{ paddingLeft: "10px", paddingRight: "10px" }}>
+        <h6>With Edit Access</h6>
+        <hr />
+        <ul>{renderBoardsList(boardsList.editorBoards)}</ul>
+        <h6>With View Access</h6>
+        <hr />
+        <ul>{renderBoardsList(boardsList.viewerBoards)}</ul>
+      </div>
     </div>
   );
 }
