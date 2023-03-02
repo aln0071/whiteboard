@@ -74,6 +74,47 @@ app.get("/api/v1/board/list", async (req, res, next) => {
   }
 });
 
+app.put("/api/v1/board/logs/write", async (req, res, next) => {
+  const logs = req.body;
+  const boardnames = Object.keys(logs);
+  const updates = boardnames.map((boardname) => ({
+    updateOne: {
+      filter: { name: boardname },
+      update: {
+        $push: {
+          useractivity: {
+            $each: logs[boardname],
+          },
+        },
+      },
+    },
+  }));
+  try {
+    await BoardModel.bulkWrite(updates);
+  } catch (error) {
+    return next(error);
+  }
+  res.sendStatus(200);
+  next();
+});
+
+app.get("/api/v1/board/logs/:id", async (req, res, next) => {
+  const boardid = req.params.id;
+  const userid = req.get("userid");
+  try {
+    const board = await BoardModel.findById(boardid, ["useractivity", "owner"]);
+    if (board === null) {
+      throw new Error("Invalid board id");
+    } else if (String(board.owner).localeCompare(userid) !== 0) {
+      throw new Error("Only the owner can view analytics of a board");
+    }
+    res.json(board);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.put("/api/v1/board/sharing/:id", async (req, res, next) => {
   const userid = req.get("userid");
   const boardid = req.params.id;
@@ -81,7 +122,7 @@ app.put("/api/v1/board/sharing/:id", async (req, res, next) => {
     const board = await BoardModel.findById(boardid);
     if (board === null) {
       return next(new Error("Board with this id does not exist"));
-    } else if (String(board.owner).localeCompare(String(userid))) {
+    } else if (String(board.owner).localeCompare(String(userid)) !== 0) {
       return next(
         new Error("Only the owner can change sharing options of the board")
       );

@@ -1,7 +1,7 @@
 const { getJwtTokenFromCookie } = require("./jwtauth.js");
 
 var iolib = require("socket.io"),
-  { log, gauge, monitorFunction } = require("./log.js"),
+  { log, gauge, monitorFunction, logUserActivity } = require("./log.js"),
   BoardData = require("./boardData.js").BoardData,
   config = require("./configuration"),
   jsonwebtoken = require("jsonwebtoken");
@@ -46,6 +46,7 @@ function startIO(app) {
           function (err, decoded) {
             if (err)
               return next(new Error("Authentication error: Invalid JWT"));
+            socket.handshake.userid = decoded._id;
             next();
           }
         );
@@ -87,6 +88,14 @@ function handleSocketConnection(socket) {
 
     // Join the board
     socket.join(name);
+
+    // console.log(
+    //   "joinboard; userid: ",
+    //   socket.handshake.userid,
+    //   "; boardname: ",
+    //   name
+    // );
+    logUserActivity(socket.handshake.userid, name, "joinboard");
 
     var board = await getBoard(name);
     board.users.add(socket.id);
@@ -167,6 +176,13 @@ function handleSocketConnection(socket) {
       if (boards.hasOwnProperty(room)) {
         var board = await boards[room];
         board.users.delete(socket.id);
+        // console.log(
+        //   "disconnect; userid: ",
+        //   socket.handshake.userid,
+        //   "; boardname: ",
+        //   board.name
+        // );
+        logUserActivity(socket.handshake.userid, board.name, "disconnection");
         var userCount = board.users.size;
         log("disconnection", {
           board: board.name,
