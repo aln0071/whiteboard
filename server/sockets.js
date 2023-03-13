@@ -108,6 +108,17 @@ function handleSocketConnection(socket) {
     socket.emit("broadcast", { _children: board.getAll() });
   });
 
+
+  socket.on("question", async function broacastQuestion(data) {
+    log("question published | ", data.data)
+    //broadcast - sends to all customers
+    //to of the specific board
+    //emit sends key value data to the clients  
+    //Send data to all other users connected on the same board
+    // Get the modal
+    socket.broadcast.to(data.board).emit("addQuestion", data);
+  });
+
   socket.on("joinboard", noFail(joinBoard));
 
   var lastEmitSecond = (Date.now() / config.MAX_EMIT_COUNT_PERIOD) | 0;

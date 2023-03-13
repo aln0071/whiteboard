@@ -1,3 +1,4 @@
+Tools.add(endsessionTool);
 Tools.add(pencilTool);
 Tools.add(rectangleTool);
 Tools.add(textTool);
@@ -5,5 +6,6 @@ Tools.add(lineTool);
 Tools.add(eraserTool);
 Tools.add(ellipseTool);
 Tools.add(handTool);
+Tools.add(questionTool);
 Tools.add(micTool);
 Tools.change("Hand");

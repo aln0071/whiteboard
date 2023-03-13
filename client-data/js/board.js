@@ -88,6 +88,28 @@ Tools.connect = function () {
   this.socket.on("reconnect", function onReconnection() {
     Tools.socket.emit("joinboard", Tools.boardName);
   });
+
+  this.socket.on("addQuestion", function broacastQuestionClient(questionData) {
+    var data = questionData.data
+    questionId = data.questionId
+    console.log("questions Client|", data)
+    var text = document.createTextNode(data.data),
+      el = document.createElement('div')
+
+    var form = document.createElement("form");
+    var element1 = document.createElement("input");
+
+    form.method = "POST";
+    form.action = "javascript:handleAnswerSubmit(\'" + questionId + "\')";
+
+    element1.id = questionId;
+    form.appendChild(element1);
+    form.submit();
+
+    el.appendChild(text);
+    el.appendChild(form);
+    messages.appendChild(el);
+  })
 };
 
 Tools.connect();
@@ -242,9 +264,9 @@ Tools.register = function registerTool(newTool) {
   if (newTool.name in Tools.list) {
     console.log(
       "Tools.add: The tool '" +
-        newTool.name +
-        "' is already" +
-        "in the list. Updating it..."
+      newTool.name +
+      "' is already" +
+      "in the list. Updating it..."
     );
   }
 
@@ -595,10 +617,10 @@ Tools.toolHooks = [
       tool.listeners = {};
     }
     if (typeof tool.onstart !== "function") {
-      tool.onstart = function () {};
+      tool.onstart = function () { };
     }
     if (typeof tool.onquit !== "function") {
-      tool.onquit = function () {};
+      tool.onquit = function () { };
     }
   },
   function compileListeners(tool) {
@@ -784,18 +806,18 @@ Tools.svg.height.baseVal.value = document.body.clientHeight;
 /**
  What does a "tool" object look like?
  newtool = {
-	  "name" : "SuperTool",
-	  "listeners" : {
-			"press" : function(x,y,evt){...},
-			"move" : function(x,y,evt){...},
-			"release" : function(x,y,evt){...},
-	  },
-	  "draw" : function(data, isLocal){
-			//Print the data on Tools.svg
-	  },
-	  "onstart" : function(oldTool){...},
-	  "onquit" : function(newTool){...},
-	  "stylesheet" : "style.css",
+    "name" : "SuperTool",
+    "listeners" : {
+      "press" : function(x,y,evt){...},
+      "move" : function(x,y,evt){...},
+      "release" : function(x,y,evt){...},
+    },
+    "draw" : function(data, isLocal){
+      //Print the data on Tools.svg
+    },
+    "onstart" : function(oldTool){...},
+    "onquit" : function(newTool){...},
+    "stylesheet" : "style.css",
 }
 */
 
