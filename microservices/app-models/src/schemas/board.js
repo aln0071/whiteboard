@@ -6,6 +6,7 @@ const BoardSchema = new Schema({
   owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
   viewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
   editors: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  questions: [{ type: Schema.Types.ObjectId, ref: "Question", default: [] }],
 });
 
 module.exports = BoardSchema;

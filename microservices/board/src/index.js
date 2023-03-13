@@ -7,9 +7,10 @@ const { DB_URI } = require("./config");
 const mongoose = require("mongoose");
 mongoose.connect(DB_URI);
 
-const { BoardSchema, UserSchema } = require("app-models");
+const { BoardSchema, UserSchema, QuestionSchema } = require("app-models");
 const BoardModel = mongoose.model("Board", BoardSchema);
 const UserModel = mongoose.model("User", UserSchema);
+const QuestionModel = mongoose.model("Question", QuestionSchema);
 
 app.use(express.json());
 
@@ -30,6 +31,67 @@ app.post("/api/v1/board/create/:boardname", async (req, res, next) => {
     newBoard.owner = req.get("userid");
     await newBoard.save();
     res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/v1/board/question", async (req, res, next) => {
+  console.log("wwwww")
+  const question = req.body;
+  console.log("pppppp", question)
+  try {
+    const newQuestion = new QuestionModel();
+    newQuestion.question = question.description;
+    newQuestion.answerArray = []
+    const result = await newQuestion.save();
+    const id = result._id
+    const findboardCondition = {
+      "name": question.boardName
+    };
+    const ansupdateCondition = {
+      $addToSet: {
+        "questions": [id]
+      }
+    }
+    let board = await BoardModel.updateOne(findboardCondition, ansupdateCondition)
+    res.send(id)
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/v1/board/answer", async (req, res, next) => {
+  const answer = req.body;
+  try {
+    const newAnswer = {};
+    newAnswer.answer = answer.description;
+    newAnswer.userId = answer.userId;
+    const findboardCondition = {
+      "_id": answer.questionId
+    };
+    const ansupdateCondition = {
+      $addToSet: {
+        "answerArray": [newAnswer]
+      }
+    }
+    await QuestionModel.updateOne(findboardCondition, ansupdateCondition)
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/v1/board/fetchquestions", async (req, res, next) => {
+  const answer = req.body;
+  try {
+    const findboardCondition = {
+      "name": answer.questionId
+    }
+    const question = await BoardModel.find(findboardCondition).populate("questions")
+    console.log("fetching check", question)
+    res.send(question);
   } catch (error) {
     next(error);
   }
@@ -121,6 +183,25 @@ app.put("/api/v1/board/sharing/:id", async (req, res, next) => {
         viewers,
         results,
       });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.put("/api/v1/board/removeEditAccess/:id", async (req, res, next) => {
+  const boardid = req.params.id;
+  try {
+    const board = await BoardModel.findById(boardid);
+    if (board === null) {
+      return next(new Error("Board with this id does not exist"));
+    } else {
+      const newSharingOptions = req.body;
+      const usernames = Object.keys(newSharingOptions);
+      board.viewers = usernames;
+      board.editors = [];
+      await board.save();
+      res.json({});
     }
   } catch (error) {
     next(error);
