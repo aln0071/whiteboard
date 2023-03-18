@@ -1,5 +1,8 @@
 const config = require("./configuration.js"),
-  SDC = require("statsd-client");
+  SDC = require("statsd-client"),
+  axios = require("axios");
+
+const userActivityLogs = new Map();
 
 /**
  * Parse a statsd connection string
@@ -86,4 +89,44 @@ function gauge(name, value, tags) {
   if (statsd) statsd.gauge(name, value, tags);
 }
 
-module.exports = { log, gauge, monitorFunction };
+function logUserActivity(userId, boardName, activityType = "disconnected") {
+  if (!userActivityLogs.has(boardName)) {
+    userActivityLogs.set(boardName, []);
+  }
+  const userActivity = userActivityLogs.get(boardName);
+  userActivity.push({
+    userid: userId,
+    activitytype: activityType,
+    timestamp: Date.now(),
+  });
+}
+
+/*
+ * Turn the map<String, Object> to an Object so it can be converted to JSON
+ */
+function mapToObj(inputMap) {
+  let obj = {};
+
+  inputMap.forEach(function (value, key) {
+    obj[key] = value;
+  });
+
+  return obj;
+}
+
+setInterval(async function writeLogsToDatabase() {
+  if (userActivityLogs.size > 0) {
+    const userActivityObject = mapToObj(userActivityLogs);
+    try {
+      await axios.put(
+        "http://board:3000/api/v1/board/logs/write",
+        userActivityObject
+      );
+      userActivityLogs.clear();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}, 1000 * 60);
+
+module.exports = { log, gauge, monitorFunction, logUserActivity };

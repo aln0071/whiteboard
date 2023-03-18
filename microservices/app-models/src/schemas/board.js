@@ -7,6 +7,13 @@ const BoardSchema = new Schema({
   viewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
   editors: [{ type: Schema.Types.ObjectId, ref: "User" }],
   questions: [{ type: Schema.Types.ObjectId, ref: "Question", default: [] }],
+  useractivity: [
+    {
+      userid: { type: Schema.Types.ObjectId, ref: "User" },
+      activitytype: String,
+      timestamp: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 module.exports = BoardSchema;

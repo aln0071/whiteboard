@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../../utils";
 import ShareBoard from "../share-board";
+import Analytics from "../analytics";
 
 export default function BoardsList() {
   const [boardsList, setBoardsList] = React.useState({
@@ -32,6 +33,7 @@ export default function BoardsList() {
           <>
             {`  `}
             <ShareBoard board={board} />
+            <Analytics board={board} />
           </>
         )}
       </li>

@@ -16,29 +16,29 @@ import axios from "axios";
 import { URLS } from "./utils";
 
 const publicPathLoader = async () => {
-    try {
-      const isLoggedIn = await axios.post(URLS.IS_LOGGED_IN);
-      return redirect("/private/dashboard")
-    } catch(error) {
-      return null;
-    }
+  try {
+    const isLoggedIn = await axios.post(URLS.IS_LOGGED_IN);
+    return redirect("/private/dashboard");
+  } catch (error) {
+    return null;
   }
+};
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <PublicDashboard />,
-    loader: publicPathLoader
+    loader: publicPathLoader,
   },
   {
     path: "/login",
     element: <Login />,
-    loader: publicPathLoader
+    loader: publicPathLoader,
   },
   {
     path: "/register",
     element: <Register />,
-    loader: publicPathLoader
+    loader: publicPathLoader,
   },
   {
     path: "/private",
@@ -63,7 +63,7 @@ const router = createBrowserRouter([
 class App extends Component {
   render() {
     return (
-      <div className="App">
+      <div className="App container">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

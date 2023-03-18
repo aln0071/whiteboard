@@ -7,6 +7,8 @@ export const URLS = {
   GET_BOARDS_LIST: "/api/v1/board/list",
   EDIT_BOARD_SHARING_OPTIONS: "/api/v1/board/sharing/:id",
   REMOVE_ALL_EDIT_ACCESS: "/api/v1/board/removeEditAccess/:id",
+  GET_BOARD_ANALYTICS: "/api/v1/board/logs/:id",
+  CHAT_GPT_ASK_QUESTION: "/api/v1/chatgpt/prompt",
 };
 
 export const getErrorMessage = (error) =>
