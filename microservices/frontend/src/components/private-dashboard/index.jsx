@@ -7,6 +7,7 @@ import { getErrorMessage, URLS } from "../../utils";
 import Form from "react-bootstrap/Form";
 import BoardsList from "./boards-list";
 import crypto from "crypto";
+import ChatBot from "./chatbot";
 
 export default function PrivateDashboard() {
   const navigate = useNavigate();
@@ -89,6 +90,7 @@ export default function PrivateDashboard() {
         Logout
       </Button>
       {"  "}
+      <ChatBot />
     </div>
   );
 }

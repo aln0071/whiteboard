@@ -3,6 +3,10 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import axios from "axios";
 import { URLS } from "../../../utils";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
+
+let useractivity = [];
 
 export default function Analytics({ board }) {
   const [show, setShow] = React.useState(false);
@@ -10,21 +14,28 @@ export default function Analytics({ board }) {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const [activeDurations, setActiveDurations] = React.useState({});
+  const [fromDatetime, setFromDatetime] = React.useState("");
+  const [toDatetime, setToDatetime] = React.useState("");
+
   const [analyticsSummary, setAnalyticsSummary] = React.useState({});
 
-  React.useEffect(() => {
-    async function getAnalyticsFromService() {
-      const response = await axios.get(
-        URLS.GET_BOARD_ANALYTICS.replace(":id", board._id)
-      );
-      const useractivity = response.data.useractivity || [];
-      useractivity.sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-      );
-      const summary = {};
-      const activityTracker = new Map();
-      useractivity.forEach(({ userid, timestamp, activitytype }) => {
+  function generateSummaryFromUserActivity() {
+    const summary = {};
+    const activityTracker = new Map();
+    const fromLimit = new Date(fromDatetime);
+    const toLimit = new Date(toDatetime);
+    useractivity
+      .filter(({ timestamp }) => {
+        const ts = new Date(timestamp);
+        if (!isNaN(fromLimit) && ts < fromLimit) {
+          return false;
+        }
+        if (!isNaN(toLimit) && ts > toLimit) {
+          return false;
+        }
+        return true;
+      })
+      .forEach(({ userid, timestamp, activitytype }) => {
         if (activitytype === "joinboard") {
           if (!activityTracker.has(userid)) {
             activityTracker.set(userid, new Date(timestamp));
@@ -43,34 +54,46 @@ export default function Analytics({ board }) {
           }
         }
       });
-      Object.keys(summary).forEach((userid) => {
-        const object = summary[userid];
-        if (activityTracker.has(userid)) {
-          object.duration += Date.now() - activityTracker.get(userid);
-          object.active = true;
-        }
-        const milliseconds = object.duration;
-        console.log(object);
-        let seconds = Math.ceil(milliseconds / 1000);
-        let minutes = Math.floor(seconds / 60);
-        let hours = Math.floor(minutes / 60);
-        minutes = minutes % 60;
-        seconds = seconds % 60;
-        hours = hours.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        });
-        minutes = minutes.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        });
-        seconds = seconds.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        });
-        object.duration = `${hours}:${minutes}:${seconds}`;
+    Object.keys(summary).forEach((userid) => {
+      const object = summary[userid];
+      if (activityTracker.has(userid)) {
+        object.duration += Date.now() - activityTracker.get(userid);
+        object.active = true;
+      }
+      const milliseconds = object.duration;
+      console.log(object);
+      let seconds = Math.ceil(milliseconds / 1000);
+      let minutes = Math.floor(seconds / 60);
+      let hours = Math.floor(minutes / 60);
+      minutes = minutes % 60;
+      seconds = seconds % 60;
+      hours = hours.toLocaleString("en-US", {
+        minimumIntegerDigits: 2,
+        useGrouping: false,
       });
-      setAnalyticsSummary(summary);
+      minutes = minutes.toLocaleString("en-US", {
+        minimumIntegerDigits: 2,
+        useGrouping: false,
+      });
+      seconds = seconds.toLocaleString("en-US", {
+        minimumIntegerDigits: 2,
+        useGrouping: false,
+      });
+      object.duration = `${hours}:${minutes}:${seconds}`;
+    });
+    setAnalyticsSummary(summary);
+  }
+
+  React.useEffect(() => {
+    async function getAnalyticsFromService() {
+      const response = await axios.get(
+        URLS.GET_BOARD_ANALYTICS.replace(":id", board._id)
+      );
+      useractivity = response.data.useractivity || [];
+      useractivity.sort(
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+      );
+      generateSummaryFromUserActivity();
     }
     if (show === true) {
       // make api call
@@ -92,6 +115,55 @@ export default function Analytics({ board }) {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          <Form.Group>
+            <Form.Label>From</Form.Label>
+            <InputGroup className="mb-3">
+              <Form.Control
+                type="datetime-local"
+                value={fromDatetime}
+                onChange={(e) => {
+                  setFromDatetime(e.target.value);
+                }}
+              />
+              <Button
+                variant="outline-secondary"
+                onClick={() => {
+                  setFromDatetime("");
+                }}
+              >
+                Clear
+              </Button>
+            </InputGroup>
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>To</Form.Label>
+            <InputGroup className="mb-3">
+              <Form.Control
+                type="datetime-local"
+                value={toDatetime}
+                onChange={(e) => {
+                  setToDatetime(e.target.value);
+                }}
+              />
+              <Button
+                variant="outline-secondary"
+                onClick={() => {
+                  setToDatetime("");
+                }}
+              >
+                Clear
+              </Button>
+            </InputGroup>
+          </Form.Group>
+          <div className="_right-button">
+            <Button
+              variant="outline-secondary"
+              onClick={() => generateSummaryFromUserActivity()}
+            >
+              Apply Filter
+            </Button>
+          </div>
+          <hr />
           <table className="analytics-table">
             <thead>
               <tr>
@@ -111,8 +183,12 @@ export default function Analytics({ board }) {
                   </tr>
                 );
               })}
-              {Object.keys(activeDurations).size > 0 && (
-                <td colSpan={3}>No data found</td>
+              {Object.keys(analyticsSummary).length === 0 && (
+                <tr>
+                  <td colSpan={3} style={{ textAlign: "center" }}>
+                    No data found
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

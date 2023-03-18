@@ -77,6 +77,23 @@ services:
       - NODE_ENV=development
       - MONGO_DB_URI=mongodb://mongodb/data
 
+  chatgpt:
+    image: chatgpt
+    build:
+      context: ./microservices/chatgpt
+      dockerfile: Dockerfile
+    container_name: chatgpt
+    volumes:
+      - ./microservices/chatgpt/src:/app/src:z
+      - ./microservices/chatgpt/package.json:/app/package.json:z
+      - ./microservices/chatgpt/package-lock.json:/app/package-lock.json:z
+      - ./microservices/.env_chatgpt:/app/.env
+    ports:
+      - "3003:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+
   mongodb:
     image: mongo
     ports:
@@ -96,3 +113,4 @@ services:
       - authentication
       - www
       - board
+      - chatgpt
