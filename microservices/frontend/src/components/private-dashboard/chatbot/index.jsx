@@ -95,36 +95,6 @@ export default function ChatBot() {
       } catch (error) {
         toast.error(getErrorMessage(error));
       }
-      // try {
-      //   const response = await axios.post(URLS.CHAT_GPT_ASK_QUESTION, {
-      //     q,
-      //     context: chatsContextRef.current,
-      //   });
-      //   if (response.status === 200) {
-      //     const { data, context } = response.data;
-      //     chatsDataRef.current = [
-      //       ...chatsDataRef.current,
-      //       {
-      //         type: "reply",
-      //         body: data.replace(/^\s+|\s+$/g, ""),
-      //       },
-      //     ];
-      //     setChats(chatsDataRef.current);
-      //     chatsContextRef.current = [
-      //       ...context,
-      //       {
-      //         type: "reply",
-      //         body: data.replace(/^\s+|\s+$/g, ""),
-      //       },
-      //     ];
-      //   } else {
-      //     throw new Error(
-      //       "Chat bot responded with invalid status code " + response.status
-      //     );
-      //   }
-      // } catch (error) {
-      //   toast.error(getErrorMessage(error));
-      // }
     }
     chatQuestionRef.current?.focus();
   }
@@ -132,6 +102,9 @@ export default function ChatBot() {
   React.useEffect(() => {
     if (chatBodyRef.current)
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+    if (isOpen) {
+      setTimeout(() => chatQuestionRef.current?.focus(), 1000);
+    }
   }, [isOpen, chats]);
 
   if (isOpen === false) {
@@ -199,7 +172,7 @@ export default function ChatBot() {
               }}
             />
             <Button
-              variant="primary"
+              variant="secondary"
               onClick={() => {
                 sendQuestion();
               }}

@@ -9,6 +9,7 @@ export const URLS = {
   REMOVE_ALL_EDIT_ACCESS: "/api/v1/board/removeEditAccess/:id",
   GET_BOARD_ANALYTICS: "/api/v1/board/logs/:id",
   CHAT_GPT_ASK_QUESTION: "/api/v1/chatgpt/prompt",
+  FETCH_QUESTIONS: "/api/v1/board/fetchquestions",
 };
 
 export const getErrorMessage = (error) =>

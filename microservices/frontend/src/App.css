@@ -1,5 +1,13 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f7f9fc !important;
+}
+
 .App {
-    margin: 1rem;
+    /* margin: 1rem; */
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -35,13 +43,13 @@
 }
 
 .chatbot-open-btn {
+    border: none;
     opacity: 0;
-    border: 2px solid rgb(37, 148, 240);
     border-radius: 70px;
     padding: 15px;
-    background-color: rgb(37, 148, 240);
+    background: rgba(37, 148, 240, 0.9);
     transition: all 0.3s ease;
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
     animation-name: show-chat-button;
     animation-duration: 0.3s;
     animation-fill-mode: forwards;
@@ -49,8 +57,8 @@
 
 .chatbot-open-btn:hover {
     transition: all 0.3s ease;
-    background-color: rgb(37, 148, 240);
-    opacity: 1;
+    background: rgb(37, 148, 240);
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
 }
 
 @keyframes expand-chat-window {
@@ -96,8 +104,8 @@
 }
 
 .chatbot-header {
-    background-color: rgb(37, 148, 240);
-    color: white;
+    background-color: #f2f6fc;
+    color: black;
     font-weight: bold;
     margin: -10px -10px 0px -10px;
     padding: 10px;
@@ -110,7 +118,7 @@
 .chatbot-minimize-btn {
     border: none;
     background: transparent;
-    color: white;
+    color: black;
     font-weight: bolder;
     font-size: 20px;
     line-height: 0px;
@@ -183,12 +191,12 @@
 }
 
 .chatbot-body::-webkit-scrollbar-thumb {
-    background: rgba(37, 148, 240, 0.8);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 5px;
 }
 
 .chatbot-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(37, 148, 240, 1);
+    background: rgba(0, 0, 0, 0.7);
 }
 
 @keyframes chatbot-body-cover-disolve {
@@ -206,7 +214,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(37, 148, 240, 1);
+    background-color: #f2f6fc;
     z-index: 3;
     animation-name: chatbot-body-cover-disolve;
     animation-duration: 0.8s;
@@ -217,4 +225,271 @@
 .chatbot-footer {
     padding-top: 10px;
     border-top: 1px solid gainsboro;
+}
+
+.my-boards {
+    border: 2px solid gainsboro;
+    border-radius: 10px;
+    display: inline-block;
+    padding: 10px;
+    padding-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: auto;
+    column-gap: 20px;
+    row-gap: 20px;
+    width: 364px;
+    height: 254px;
+    overflow: hidden;
+}
+
+.my-boards::-webkit-scrollbar {
+    width: 3px;
+}
+
+.my-boards::-webkit-scrollbar-thumb {
+    background: rgba(37, 148, 240, 0.8);
+    border-radius: 5px;
+}
+
+.section-outer-container {
+    position: relative;
+    display: inline-block;
+}
+
+.board-thumb {
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 5px -1px, rgba(0, 0, 0, 0.14) 0px 6px 10px 0px, rgba(0, 0, 0, 0.12) 0px 1px 18px 0px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 100px;
+    padding: 10px;
+    color: gray;
+    border-radius: 10px;
+}
+
+.board-thumb.add-board {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 70px;
+    line-height: 0px;
+}
+
+.board-thumb-holder > .board-thumb.add-board {
+    transform: rotateY(0deg);
+    transition: all 0.5s linear;
+}
+
+.board-thumb-holder:hover > .board-thumb.add-board {
+    transform: rotateY(180deg);
+    transition: all 0.5s linear;
+}
+
+.board-thumb-holder .create-icon {
+    transition: all 0.5s linear;
+    opacity: 1;
+}
+
+.board-thumb-holder .hidden-create-text {
+    transition: all 0.5s linear;
+    opacity: 0;
+}
+
+.board-thumb-holder:hover .create-icon {
+    transition: all 0.5s linear;
+    opacity: 0;
+}
+
+.board-thumb-holder:hover .hidden-create-text {
+    transition: all 0.5s linear;
+    opacity: 1;
+}
+
+.hidden-create-text {
+    font-size: 12px;
+    white-space: pre-wrap;
+    opacity: 0;
+    text-align: center;
+    line-height: normal;
+    transform: scaleX(-1);
+    position: absolute;
+    max-width: 100px;
+}
+
+.grid-section-header {
+    position: absolute;
+    top: -15px;
+    left: 15px;
+    background: white;
+    padding: 0px 5px;
+}
+
+.outer-container {
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.site-layout-container {
+    display: grid;
+    grid-template-columns: 200px 1fr 15px;
+    grid-template-rows: 50px 1fr 15px;
+    grid-template-areas:
+    "site-icon top-header"
+    "left-navigation site-body";
+    /* border: 1px solid red; */
+    min-height: 100vh;
+}
+
+.site-icon {
+    grid-area: site-icon;
+    /* justify-self: center; */
+    align-self: center;
+    padding-left: 36px;
+    font-weight: bold;
+    font-size: 20px;
+    /* line-height: 0px; */
+}
+
+.top-header {
+    grid-area: top-header;
+    align-self: center;
+    display: grid;
+    grid-template-columns: 1fr 60px;
+    grid-template-rows: auto;
+}
+
+.left-navigation {
+    grid-area: left-navigation;
+    border-right: 2px solid gainsboro;
+    border-top: 2px solid gainsboro;
+}
+
+.site-body {
+    grid-area: site-body;
+    border-top: 2px solid gainsboro;
+    background-color: #ffffff;
+    /* border-radius: 16px; */
+}
+
+.left-nav-list {
+    list-style-type: none;
+}
+
+.left-nav-list > li {
+    border-radius: 100px;
+    margin-right: 10px;
+    padding: 3px 5px;
+}
+
+.left-nav-list > li.navigable-item:hover {
+    background-color: #e6e7ea;
+    cursor: pointer;
+}
+
+.search-box {
+    display: inline-block;
+}
+
+.profile-icon {
+    width: 38px;
+    height: 38px;
+    background-color: gray;
+    border-radius: 100px;
+    justify-self: right;
+    align-self: center;
+}
+
+.boards-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-rows: auto;
+    column-gap: 10px;
+    row-gap: 10px;
+    padding: 10px;
+}
+
+.boards-list-item {
+    height: 100px;
+    cursor: pointer;
+    background-color: #f2f6fc;
+    text-overflow: ellipsis;
+    display: flex;
+    align-content: center;
+    width: 100%;
+    padding: 0px 10px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.boards-list-item:hover {
+    background-color: #e1e5ea;
+}
+
+.boards-list-item > .board-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.board-context-menu {
+    position: absolute;
+    background: #ffffff;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
+    border-radius: 10px;
+    z-index: 6;
+    /* top: calc(100% - 20px);
+    left: calc(100% - 20px); */
+    white-space: nowrap;
+    padding: 10px 0px;
+}
+
+.board-context-menu-list {
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+    position: relative;
+}
+
+.board-context-menu-list > li {
+    padding: 0px 10px;
+}
+
+.board-context-menu-list > li:hover {
+    background: #e6e7ea;
+}
+
+.board-context-menu-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5;
+}
+
+.boards-list-item-selected {
+    background-color: #c2e7ff !important;
+}
+
+.new-wb-btn {
+    border-radius: 10px;
+    background-color: #ffffff;
+    border: none;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
+    padding: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    transition: all 0.2s ease;
+}
+
+.new-wb-btn:hover {
+    background-color: #edf1fa;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
+    transition: all 0.2s ease;
 }

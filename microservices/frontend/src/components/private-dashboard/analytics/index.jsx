@@ -8,11 +8,8 @@ import InputGroup from "react-bootstrap/InputGroup";
 
 let useractivity = [];
 
-export default function Analytics({ board }) {
-  const [show, setShow] = React.useState(false);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+export default function Analytics({ isOpen, closeModal, board }) {
+  const handleClose = () => closeModal();
 
   const [fromDatetime, setFromDatetime] = React.useState("");
   const [toDatetime, setToDatetime] = React.useState("");
@@ -61,7 +58,7 @@ export default function Analytics({ board }) {
         object.active = true;
       }
       const milliseconds = object.duration;
-      console.log(object);
+      // console.log(object);
       let seconds = Math.ceil(milliseconds / 1000);
       let minutes = Math.floor(seconds / 60);
       let hours = Math.floor(minutes / 60);
@@ -95,23 +92,19 @@ export default function Analytics({ board }) {
       );
       generateSummaryFromUserActivity();
     }
-    if (show === true) {
+    if (isOpen === true) {
       // make api call
       getAnalyticsFromService();
     } else {
       // clear any previous data
     }
-  }, [show]);
+  }, [isOpen]);
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
-        Show Analytics
-      </Button>
-
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={isOpen} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title className="analytics-header">
-            Analytics of {board.name}
+            Analytics of {board?.name}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>

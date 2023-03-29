@@ -14,6 +14,7 @@ import PublicDashboard from "./components/public-dashboard";
 import PrivateDashboard from "./components/private-dashboard";
 import axios from "axios";
 import { URLS } from "./utils";
+import BoardsList from "./components/private-dashboard/boards-list";
 
 const publicPathLoader = async () => {
   try {
@@ -42,6 +43,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/private",
+    element: <PrivateDashboard />,
     loader: async () => {
       try {
         const isLoggedIn = await axios.post(URLS.IS_LOGGED_IN);
@@ -54,7 +56,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "dashboard",
-        element: <PrivateDashboard />,
+        element: <BoardsList tab="my-boards" />,
+      },
+      {
+        path: "shared-with-me",
+        element: <BoardsList tab="shared-with-me" />,
       },
     ],
   },
@@ -63,7 +69,7 @@ const router = createBrowserRouter([
 class App extends Component {
   render() {
     return (
-      <div className="App container">
+      <div className="App">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

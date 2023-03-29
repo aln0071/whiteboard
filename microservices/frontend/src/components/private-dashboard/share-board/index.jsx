@@ -6,24 +6,15 @@ import Form from "react-bootstrap/Form";
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
-import Table from "react-bootstrap/Table";
 import { URLS, getErrorMessage } from "../../../utils";
 import axios from "axios";
 import { toast } from "react-toastify";
 
-function ShareBoard({ board }) {
+function ShareBoard({ isOpen, closeModal, board }) {
   const [users, setUsers] = React.useState({});
   const [currentUser, setCurrentUser] = React.useState("");
-  const [boards, setBoard] = React.useState([]);
 
-  const [show, setShow] = React.useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-
-  const [showResponse, setShowResponses] = React.useState(false);
-  const handleCloseResponses = () => setShowResponses(false);
-  const handleShowResponses = () => setShowResponses(true);
+  const handleClose = () => closeModal();
 
   const handleAddUser = () => {
     if (currentUser.trim() === "") return;
@@ -49,41 +40,11 @@ function ShareBoard({ board }) {
     }
   };
 
-
-  const showResponses = async () => {
-    const url = "http://localhost:2000/api/v1/board/fetchquestions";
-    try {
-      const response = await axios.post(url, {
-        "questionId": board.name
-      }).then(data => {
-        setBoard(data.data[0].questions)
-        console.log(data)
-      })
-      setShowResponses(true);
-      if (response.status === 200) {
-        toast.success("Fetching Questions");
-        setShowResponses(true);
-      } else {
-        throw new Error("Invalid status code: " + response.status);
-      }
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    }
-  };
-
-  React.useEffect(() => { }, [board]);
+  React.useEffect(() => {}, [board]);
 
   return (
     <>
-      <Button variant="primary" onClick={handleShow}>
-        Edit Sharing Options
-      </Button>
-
-      <Button variant="primary" onClick={showResponses}>
-        Answer Responses
-      </Button>
-
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={isOpen} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Sharing Options</Modal.Title>
         </Modal.Header>
@@ -165,29 +126,6 @@ function ShareBoard({ board }) {
             Save Changes
           </Button>
         </Modal.Footer>
-      </Modal>
-
-
-      <Modal show={showResponse} onHide={handleCloseResponses}>
-        <Modal.Header closeButton>
-          <Modal.Title>Responses Sheet</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {boards && Array.isArray(boards) && boards.map(data => {
-            return (<>
-              <h3>{data.question}</h3>
-              <Table>
-                {data.answerArray.map(answer => {
-                  return (<tr>
-                    <td>{answer.userId}</td>
-                    <td>{answer.answer}</td>
-                  </tr>)
-                })}
-              </Table>
-              <hr></hr>
-            </>)
-          })}
-        </Modal.Body>
       </Modal>
     </>
   );
