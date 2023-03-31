@@ -381,12 +381,21 @@ body {
 .left-nav-list > li {
     border-radius: 100px;
     margin-right: 10px;
-    padding: 3px 5px;
+    padding: 3px 8px;
 }
 
 .left-nav-list > li.navigable-item:hover {
     background-color: #e6e7ea;
     cursor: pointer;
+}
+
+.left-nav-list > li.navigable-item.selected {
+    background-color: #c2e7ff;
+}
+
+.left-nav-list > li.navigable-item.selected:hover {
+    background-color: #c2e7ff;
+    cursor: default;
 }
 
 .search-box {
@@ -412,8 +421,8 @@ body {
 }
 
 .boards-list-item {
-    height: 100px;
-    cursor: pointer;
+    height: 50px;
+    cursor: default;
     background-color: #f2f6fc;
     text-overflow: ellipsis;
     display: flex;
@@ -422,10 +431,14 @@ body {
     padding: 0px 10px;
     border-radius: 10px;
     position: relative;
+    display: grid;
+    grid-template-columns: 1fr 25px;
+    grid-template-rows: auto;
+    align-items: center;
 }
 
 .boards-list-item:hover {
-    background-color: #e1e5ea;
+    background-color: rgb(225, 229, 234);
 }
 
 .boards-list-item > .board-name {
@@ -435,6 +448,7 @@ body {
     white-space: nowrap;
     margin-top: auto;
     margin-bottom: auto;
+    padding-right: 10px;
 }
 
 .board-context-menu {
@@ -462,6 +476,7 @@ body {
 
 .board-context-menu-list > li:hover {
     background: #e6e7ea;
+    cursor: pointer;
 }
 
 .board-context-menu-backdrop {
@@ -482,14 +497,44 @@ body {
     background-color: #ffffff;
     border: none;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 1px -2px, rgba(0, 0, 0, 0.14) 0px 2px 2px 0px, rgba(0, 0, 0, 0.12) 0px 1px 5px 0px;
-    padding: 5px;
+    padding: 5px 8px;
     margin-top: 5px;
     margin-bottom: 5px;
     transition: all 0.2s ease;
+    margin-left: -3px;
 }
 
 .new-wb-btn:hover {
     background-color: #edf1fa;
     box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
     transition: all 0.2s ease;
+}
+
+.nav-item-icon {
+    margin-right: 5px;
+}
+
+.context-item-icon {
+    margin-right: 5px;
+}
+
+.options-icon {
+    width: 25px;
+    height: 25px;
+    padding: 5px;
+    justify-self: center;
+    border-radius: 100px;
+}
+
+.options-icon:hover {
+    background-color: hwb(213 88% 35%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.options-icon-content {
+    width: 15px;
+    height: 15px;
+    background-image: radial-gradient(circle, black 1px, transparent 2px);
+    background-size: 100% 33.33%;
 }

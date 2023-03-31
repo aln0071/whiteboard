@@ -2,15 +2,26 @@ import * as React from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../utils";
 import CreateNewBoardModal from "./create-new-board";
 import ChatBot from "./chatbot";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUserFriends,
+  faChalkboard,
+  faClock,
+  faStar,
+  faTrashCan,
+  faUser,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function PrivateDashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const logout = async () => {
     try {
@@ -62,22 +73,82 @@ export default function PrivateDashboard() {
               </li>
               <li
                 onClick={() => navigate("dashboard")}
-                className="navigable-item"
+                className={
+                  "navigable-item" +
+                  (location.pathname === "/private/dashboard"
+                    ? " selected"
+                    : "")
+                }
               >
+                <FontAwesomeIcon
+                  icon={faChalkboard}
+                  className="nav-item-icon"
+                  size="xs"
+                  fixedWidth
+                />
                 My Boards
               </li>
               <li
                 onClick={() => navigate("shared-with-me")}
-                className="navigable-item"
+                className={
+                  "navigable-item" +
+                  (location.pathname === "/private/shared-with-me"
+                    ? " selected"
+                    : "")
+                }
               >
+                <FontAwesomeIcon
+                  icon={faUserFriends}
+                  className="nav-item-icon"
+                  size="xs"
+                  fixedWidth
+                />
                 Shared with me
               </li>
-              <li className="navigable-item">Recent</li>
-              <li className="navigable-item">Starred</li>
-              <li className="navigable-item">Trash</li>
+              <li className="navigable-item">
+                <FontAwesomeIcon
+                  icon={faClock}
+                  className="nav-item-icon"
+                  size="xs"
+                  fixedWidth
+                />
+                Recent
+              </li>
+              <li className="navigable-item">
+                <FontAwesomeIcon
+                  icon={faStar}
+                  className="nav-item-icon"
+                  size="xs"
+                  fixedWidth
+                />
+                Starred
+              </li>
+              <li className="navigable-item">
+                <FontAwesomeIcon
+                  icon={faTrashCan}
+                  className="nav-item-icon"
+                  size="xs"
+                  fixedWidth
+                />
+                Trash
+              </li>
               <hr />
-              <li className="navigable-item">Profile</li>
+              <li className="navigable-item">
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="nav-item-icon"
+                  size="xs"
+                  fixedWidth
+                />
+                Profile
+              </li>
               <li className="navigable-item" onClick={() => logout()}>
+                <FontAwesomeIcon
+                  icon={faRightFromBracket}
+                  className="nav-item-icon"
+                  size="xs"
+                  fixedWidth
+                />
                 Logout
               </li>
             </ul>

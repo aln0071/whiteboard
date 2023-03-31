@@ -5,6 +5,15 @@ import { getErrorMessage, URLS } from "../../../utils";
 import ShareBoard from "../share-board";
 import Analytics from "../analytics";
 import AnswerResponses from "../answer-responses";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUserPlus,
+  faLink,
+  faStar,
+  faChartLine,
+  faQuestion,
+  faTrashCan,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function BoardsList({ tab }) {
   const [showCtxtMenu, setShowCtxtMenu] = React.useState({});
@@ -85,7 +94,7 @@ export default function BoardsList({ tab }) {
                 top: y,
                 left: x,
               };
-              const contextMenuWidth = 160;
+              const contextMenuWidth = 180;
               const contextMenuHeight = 165;
               if (window.innerWidth < e.pageX + contextMenuWidth) {
                 // fix right overflow
@@ -117,6 +126,25 @@ export default function BoardsList({ tab }) {
             }}
           >
             <span className="board-name">{board.name}</span>
+            <span
+              className="options-icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const syntheticEvent = new MouseEvent("contextmenu", {
+                  bubbles: true,
+                  cancelable: false,
+                  view: window,
+                  button: 2,
+                  buttons: 0,
+                  clientX: e.clientX,
+                  clientY: e.clientY,
+                });
+                e.target.dispatchEvent(syntheticEvent);
+              }}
+            >
+              <div className="options-icon-content"></div>
+            </span>
             {showCtxtMenu[board._id] && (
               <>
                 <div
@@ -129,13 +157,43 @@ export default function BoardsList({ tab }) {
                 >
                   <ul className="board-context-menu-list">
                     {isOwner && (
-                      <li onClick={() => setShowShareModal(true)}>Share</li>
+                      <li onClick={() => setShowShareModal(true)}>
+                        <FontAwesomeIcon
+                          icon={faUserPlus}
+                          className="context-item-icon"
+                          size="xs"
+                          fixedWidth
+                        />
+                        Share
+                      </li>
                     )}
-                    <li>Copy link</li>
-                    <li>Add to starred</li>
+                    <li>
+                      <FontAwesomeIcon
+                        icon={faLink}
+                        className="context-item-icon"
+                        size="xs"
+                        fixedWidth
+                      />
+                      Copy link
+                    </li>
+                    <li>
+                      <FontAwesomeIcon
+                        icon={faStar}
+                        className="context-item-icon"
+                        size="xs"
+                        fixedWidth
+                      />
+                      Add to starred
+                    </li>
                     {isOwner && (
                       <>
                         <li onClick={() => setShowAnalyticsModal(true)}>
+                          <FontAwesomeIcon
+                            icon={faChartLine}
+                            className="context-item-icon"
+                            size="xs"
+                            fixedWidth
+                          />
                           Analytics
                         </li>
                         <li
@@ -143,9 +201,23 @@ export default function BoardsList({ tab }) {
                             setShowAnswerResponses(true);
                           }}
                         >
+                          <FontAwesomeIcon
+                            icon={faQuestion}
+                            className="context-item-icon"
+                            size="xs"
+                            fixedWidth
+                          />
                           Answer Responses
                         </li>
-                        <li>Remove</li>
+                        <li>
+                          <FontAwesomeIcon
+                            icon={faTrashCan}
+                            className="context-item-icon"
+                            size="xs"
+                            fixedWidth
+                          />
+                          Remove
+                        </li>
                       </>
                     )}
                   </ul>
