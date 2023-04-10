@@ -139,7 +139,13 @@ export default function PrivateDashboard() {
                 Trash
               </li>
               <hr />
-              <li className="navigable-item">
+              <li
+                onClick={() => navigate("profile")}
+                className={
+                  "navigable-item" +
+                  (location.pathname === "/private/profile" ? " selected" : "")
+                }
+              >
                 <FontAwesomeIcon
                   icon={faUser}
                   className="nav-item-icon"

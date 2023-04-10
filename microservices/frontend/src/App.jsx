@@ -18,6 +18,7 @@ import BoardsList from "./components/private-dashboard/boards-list";
 import store from "./redux/store";
 import { setStarredBoardsAction } from "./redux/actions/starredBoards";
 import { setUserDetailsAction } from "./redux/actions/user";
+import Profile from "./components/private-dashboard/profile";
 
 const publicPathLoader = async () => {
   try {
@@ -79,6 +80,10 @@ const router = createBrowserRouter([
       {
         path: "starred",
         element: <BoardsList tab="starred" />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
     ],
   },
