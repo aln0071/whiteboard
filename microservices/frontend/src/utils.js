@@ -10,6 +10,7 @@ export const URLS = {
   GET_BOARD_ANALYTICS: "/api/v1/board/logs/:id",
   CHAT_GPT_ASK_QUESTION: "/api/v1/chatgpt/prompt",
   FETCH_QUESTIONS: "/api/v1/board/fetchquestions",
+  TOGGLE_STARRED: "/api/v1/authentication/toggleStarred/:id",
 };
 
 export const getErrorMessage = (error) =>

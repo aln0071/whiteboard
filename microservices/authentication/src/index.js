@@ -142,9 +142,47 @@ app.post("/api/v1/authentication/isLoggedIn", async (req, res, next) => {
   const jwtToken = getJwtTokenFromCookie(req);
   try {
     const decodedToken = await jwt.verify(jwtToken, secret);
-    res.sendStatus(200);
+    const starredBoards = await UserModel.findById(decodedToken._id, [
+      "starred",
+    ]);
+    res.json(starredBoards);
   } catch (error) {
     next(error);
+  }
+  next();
+});
+
+app.post("/api/v1/authentication/toggleStarred/:id", async (req, res, next) => {
+  const boardid = req.params.id?.trim();
+  const jwtToken = getJwtTokenFromCookie(req);
+  try {
+    if (!boardid) {
+      throw new Error("Invalid board id");
+    }
+    const { _id: userid } = await jwt.verify(jwtToken, secret);
+    // if board is in starred list, remove it; else add it
+    const user = await UserModel.findById(userid);
+    if (user === null) {
+      throw new Error("Invalid user id");
+    }
+    const boardidLocation = user.starred.findIndex(
+      (id) => id.toString().localeCompare(boardid) === 0
+    );
+    let message;
+    if (boardidLocation !== -1) {
+      user.starred.splice(boardidLocation, 1);
+      message = "Board removed from starred list";
+    } else {
+      user.starred.push(boardid);
+      message = "Board added to starred list";
+    }
+    await user.save();
+    res.json({
+      message,
+      starred: user.starred,
+    });
+  } catch (error) {
+    return next(error);
   }
   next();
 });

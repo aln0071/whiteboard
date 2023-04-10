@@ -15,6 +15,9 @@ import PrivateDashboard from "./components/private-dashboard";
 import axios from "axios";
 import { URLS } from "./utils";
 import BoardsList from "./components/private-dashboard/boards-list";
+import store from "./redux/store";
+import { setStarredBoardsAction } from "./redux/actions/starredBoards";
+import { setUserDetailsAction } from "./redux/actions/user";
 
 const publicPathLoader = async () => {
   try {
@@ -46,7 +49,18 @@ const router = createBrowserRouter([
     element: <PrivateDashboard />,
     loader: async () => {
       try {
-        const isLoggedIn = await axios.post(URLS.IS_LOGGED_IN);
+        const response = await axios.post(URLS.IS_LOGGED_IN);
+        if (response.status === 200) {
+          const { _id, starred = [] } = response.data;
+          store.dispatch(setStarredBoardsAction(starred));
+          store.dispatch(
+            setUserDetailsAction({
+              _id,
+            })
+          );
+        } else {
+          throw new Error("Invalid response status ", response.status);
+        }
       } catch (error) {
         toast.info("Please login");
         return redirect("/");
@@ -61,6 +75,10 @@ const router = createBrowserRouter([
       {
         path: "shared-with-me",
         element: <BoardsList tab="shared-with-me" />,
+      },
+      {
+        path: "starred",
+        element: <BoardsList tab="starred" />,
       },
     ],
   },

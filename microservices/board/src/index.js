@@ -37,25 +37,26 @@ app.post("/api/v1/board/create/:boardname", async (req, res, next) => {
 });
 
 app.post("/api/v1/board/question", async (req, res, next) => {
-  console.log("wwwww")
   const question = req.body;
-  console.log("pppppp", question)
   try {
     const newQuestion = new QuestionModel();
     newQuestion.question = question.description;
-    newQuestion.answerArray = []
+    newQuestion.answerArray = [];
     const result = await newQuestion.save();
-    const id = result._id
+    const id = result._id;
     const findboardCondition = {
-      "name": question.boardName
+      name: question.boardName,
     };
     const ansupdateCondition = {
       $addToSet: {
-        "questions": [id]
-      }
-    }
-    let board = await BoardModel.updateOne(findboardCondition, ansupdateCondition)
-    res.send(id)
+        questions: [id],
+      },
+    };
+    let board = await BoardModel.updateOne(
+      findboardCondition,
+      ansupdateCondition
+    );
+    res.send(id);
     res.sendStatus(200);
   } catch (error) {
     next(error);
@@ -69,14 +70,14 @@ app.post("/api/v1/board/answer", async (req, res, next) => {
     newAnswer.answer = answer.description;
     newAnswer.userId = answer.userId;
     const findboardCondition = {
-      "_id": answer.questionId
+      _id: answer.questionId,
     };
     const ansupdateCondition = {
       $addToSet: {
-        "answerArray": [newAnswer]
-      }
-    }
-    await QuestionModel.updateOne(findboardCondition, ansupdateCondition)
+        answerArray: [newAnswer],
+      },
+    };
+    await QuestionModel.updateOne(findboardCondition, ansupdateCondition);
     res.sendStatus(200);
   } catch (error) {
     next(error);
@@ -87,10 +88,12 @@ app.post("/api/v1/board/fetchquestions", async (req, res, next) => {
   const answer = req.body;
   try {
     const findboardCondition = {
-      "name": answer.questionId
-    }
-    const question = await BoardModel.find(findboardCondition).populate("questions")
-    console.log("fetching check", question)
+      name: answer.questionId,
+    };
+    const question = await BoardModel.find(findboardCondition).populate(
+      "questions"
+    );
+    console.log("fetching check", question);
     res.send(question);
   } catch (error) {
     next(error);
@@ -122,9 +125,18 @@ app.get("/api/v1/board/getusers/:boardname", async (req, res, next) => {
 app.get("/api/v1/board/list", async (req, res, next) => {
   const userid = req.get("userid");
   try {
-    const ownBoardsList = await BoardModel.find({ owner: userid }, "name");
-    const editorBoardsList = await BoardModel.find({ editors: userid }, "name");
-    const viewerBoardsList = await BoardModel.find({ viewers: userid }, "name");
+    const ownBoardsList = await BoardModel.find({ owner: userid }, [
+      "name",
+      "owner",
+    ]);
+    const editorBoardsList = await BoardModel.find({ editors: userid }, [
+      "name",
+      "owner",
+    ]);
+    const viewerBoardsList = await BoardModel.find({ viewers: userid }, [
+      "name",
+      "owner",
+    ]);
     res.json({
       ownBoards: ownBoardsList || [],
       editorBoards: editorBoardsList || [],

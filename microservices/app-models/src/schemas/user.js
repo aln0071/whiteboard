@@ -8,6 +8,7 @@ const UserSchema = new Schema({
     type: [{ type: String }],
     default: ["user"],
   },
+  starred: [{ type: Schema.Types.ObjectId, ref: "Board" }],
 });
 
 module.exports = UserSchema;
