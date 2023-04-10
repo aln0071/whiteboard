@@ -63,7 +63,7 @@ const router = createBrowserRouter([
 class App extends Component {
   render() {
     return (
-      <div className="App container">
+      <div className="App">
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

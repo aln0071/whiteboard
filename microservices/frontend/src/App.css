@@ -218,3 +218,16 @@
     padding-top: 10px;
     border-top: 1px solid gainsboro;
 }
+.g-4 {
+    margin-left: 10rem !important;
+    text-align: center;
+}
+
+body{
+    background-color: #dbd0f0 !important;
+}
+
+.customLogin{
+    margin-top: 14%;
+    margin-left: 35%;
+}

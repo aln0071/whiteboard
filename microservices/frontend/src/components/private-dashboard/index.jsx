@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
+import Card from 'react-bootstrap/Card';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -8,6 +9,7 @@ import Form from "react-bootstrap/Form";
 import BoardsList from "./boards-list";
 import crypto from "crypto";
 import ChatBot from "./chatbot";
+import CustomNavbar from "../customNavbar";
 
 export default function PrivateDashboard() {
   const navigate = useNavigate();
@@ -51,46 +53,44 @@ export default function PrivateDashboard() {
   };
 
   return (
-    <div>
-      private dashboard
-      <hr />
+    <>
+      <CustomNavbar />
       <div>
-        <h4>Create a board with given name</h4>
-        <Form onSubmit={handleWhiteboardNameSubmission}>
-          <Form.Control
-            className="me-auto"
-            placeholder="Enter board name here"
-            type="text"
-            pattern="^[\w%\-_~()]{1,15}$"
-            title="Please enter valid board name"
-            value={boardName}
-            onChange={(e) => setBoardName(e.target.value)}
-          />
-          <br />
-          <Button variant="primary" type="submit">
-            Create
+        <br />
+        <BoardsList />
+        <hr />
+        <br />
+
+        <center>
+          <Card bg="dark" text="white" style={{ width: '30rem' }}>
+            <Card.Body>
+              <Card.Title>Create a board with given name</Card.Title>
+              <Card.Text>
+                <Form onSubmit={handleWhiteboardNameSubmission}>
+                  <Form.Control
+                    className="me-auto"
+                    placeholder="Enter board name here"
+                    type="text"
+                    pattern="^[\w%\-_~()]{1,15}$"
+                    title="Please enter valid board name"
+                    value={boardName}
+                    onChange={(e) => setBoardName(e.target.value)}
+                  />
+                  <br />
+
+
+                  <Card.Link className="mb-2 text-muted" onClick={() => createRandomWhiteboard()} >Can't think of a name let us help : Random Board Generator</Card.Link>
+                  <br>
+                  </br><Button variant="primary" type="submit">
+                    Create
           </Button>
-        </Form>
+                </Form>
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        </center>
+        <ChatBot />
       </div>
-      <hr />
-      <BoardsList />
-      <hr />
-      <Button variant="primary" onClick={() => createRandomWhiteboard()}>
-        Create Random Whiteboard
-      </Button>
-      {"  "}
-      <Button
-        variant="primary"
-        onClick={() => (window.location.href = "/wbo/boards/anonymous")}
-      >
-        Open Public Whiteboard
-      </Button>
-      {"  "}
-      <Button variant="primary" onClick={logout}>
-        Logout
-      </Button>
-      {"  "}
-      <ChatBot />
-    </div>
+    </>
   );
 }

@@ -4,6 +4,7 @@ import Form from "react-bootstrap/Form";
 import axios from "axios";
 import { getErrorMessage, URLS } from "../../utils";
 import { toast } from "react-toastify";
+import Card from 'react-bootstrap/Card';
 
 function Register() {
   const [data, setData] = React.useState({
@@ -26,8 +27,8 @@ function Register() {
       if (response.status === 201) {
         toast.success(response.data.msg);
         setData({
-            email: '',
-            password: ''
+          email: '',
+          password: ''
         })
       } else {
         throw new Error("Invalid status " + response.status);
@@ -37,30 +38,41 @@ function Register() {
     }
   };
   return (
-    <Form onSubmit={handleSubmit}>
-      <Form.Group className="mb-3" controlId="formBasicEmail">
-        <Form.Label>Email address</Form.Label>
-        <Form.Control
-          type="email"
-          placeholder="Enter email"
-          value={data.email}
-          onChange={(e) => handleChange(e, "email")}
-        />
-      </Form.Group>
 
-      <Form.Group className="mb-3" controlId="formBasicPassword">
-        <Form.Label>Password</Form.Label>
-        <Form.Control
-          type="password"
-          placeholder="Password"
-          value={data.password}
-          onChange={(e) => handleChange(e, "password")}
-        />
-      </Form.Group>
-      <Button variant="primary" type="submit">
-        Submit
-      </Button>
-    </Form>
+    <Card bg="dark" text="white" style={{ width: '30rem' }} className="customLogin">
+      <Card.Body>
+        <center>
+          <Card.Title>Register</Card.Title>
+        </ center>
+        <Card.Text>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3" controlId="formBasicEmail">
+              <Form.Label>Email address</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter email"
+                value={data.email}
+                onChange={(e) => handleChange(e, "email")}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="formBasicPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Password"
+                value={data.password}
+                onChange={(e) => handleChange(e, "password")}
+              />
+            </Form.Group>
+            <center>
+              <Button variant="primary" type="submit">
+                Submit
+      </Button></center>
+          </Form>
+        </Card.Text>
+      </Card.Body>
+    </Card>
   );
 }
 

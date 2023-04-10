@@ -78,10 +78,13 @@ function ShareBoard({ board }) {
       <Button variant="primary" onClick={handleShow}>
         Edit Sharing Options
       </Button>
+      <br />
+      <br />
 
       <Button variant="primary" onClick={showResponses}>
         Answer Responses
       </Button>
+      {'   '}
 
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>

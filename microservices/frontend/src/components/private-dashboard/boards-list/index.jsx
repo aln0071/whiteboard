@@ -4,6 +4,11 @@ import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../../utils";
 import ShareBoard from "../share-board";
 import Analytics from "../analytics";
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Row from 'react-bootstrap/Row';
+import Button from "react-bootstrap/Button";
+import "../../../App.css";
 
 export default function BoardsList() {
   const [boardsList, setBoardsList] = React.useState({
@@ -27,31 +32,61 @@ export default function BoardsList() {
   }, []);
   const renderBoardsList = (boards, type = "not-owner") => {
     return boards.map((board) => (
-      <li key={board._id}>
-        <a href={`/wbo/boards/${board.name}`}>{board.name}</a>
-        {type === "owner" && (
-          <>
-            {`  `}
-            <ShareBoard board={board} />
-            <Analytics board={board} />
-          </>
-        )}
-      </li>
+      <>
+        {type === "owner" &&
+          (<Col>
+            <Card style={{ width: '21rem' }} bg="dark" text="white">
+              <Card.Header>{board.name}</Card.Header>
+              <Card.Body>
+                <center>
+                  <Button onClick={event => window.location.href = `/wbo/boards/${board.name}`}>Open Board</Button>{'    '}
+                  <ShareBoard board={board} />
+                  <Analytics board={board} />
+                </center>
+              </Card.Body>
+            </Card>
+          </Col>)}
+
+        {
+          type === "not-owner" &&
+          (<Col>
+            <Card style={{ width: '21rem' }} bg="dark" text="white">
+              <Card.Header>{board.name}</Card.Header>
+              <Card.Body>
+                <center>
+                  <Button onClick={event => window.location.href = `/wbo/boards/${board.name}`}>Open Board</Button>{'    '}
+                </center>
+              </Card.Body>
+            </Card>
+          </Col>)
+        }
+
+      </>
     ));
   };
   return (
     <div>
-      <h4>Own Boards</h4>
-      <ul>{renderBoardsList(boardsList.ownBoards, "owner")}</ul>
-      <hr />
-      <h4>Shared With Me</h4>
+      <h4>My Boards</h4>
+      <Row xs={1} xl={4} className="g-4">
+        {renderBoardsList(boardsList.ownBoards, "owner")}
+      </Row>
+
+      {boardsList.viewerBoards.length != 0 && boardsList.viewerBoards.length != 0 && (
+        <><hr /><h4>Shared Boards</h4></>)}
       <div style={{ paddingLeft: "10px", paddingRight: "10px" }}>
-        <h6>With Edit Access</h6>
-        <hr />
-        <ul>{renderBoardsList(boardsList.editorBoards)}</ul>
-        <h6>With View Access</h6>
-        <hr />
-        <ul>{renderBoardsList(boardsList.viewerBoards)}</ul>
+        {boardsList.editorBoards.length != 0 &&
+          (<><h6>With Edit Access</h6>
+            <hr />
+            <Row xs={1} xl={4} className="g-4">
+              {renderBoardsList(boardsList.editorBoards)}
+            </Row></>)}
+        <br />
+        {boardsList.viewerBoards.length != 0 &&
+          (<><h6>With View Access</h6>
+            <hr />
+            <Row xs={1} xl={4} className="g-4">
+              {renderBoardsList(boardsList.viewerBoards)}</Row></>)}
+
       </div>
     </div>
   );
