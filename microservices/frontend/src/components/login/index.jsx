@@ -1,12 +1,11 @@
-
 import React from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import axios from "axios";
 import { getErrorMessage, URLS } from "../../utils";
 import { toast } from "react-toastify";
-import { useNavigate } from 'react-router-dom';
-import Card from 'react-bootstrap/Card';
+import { useNavigate } from "react-router-dom";
+import Card from "react-bootstrap/Card";
 
 function Login() {
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ function Login() {
       if (response.status === 200) {
         const userDetails = response.data;
         toast.success("Login success!");
-        navigate('/private/dashboard')
+        navigate("/private/dashboard");
       } else {
         throw new Error("Invalid status " + response.status);
       }
@@ -39,14 +38,19 @@ function Login() {
     }
   };
   return (
-    <Card bg="dark" text="white" style={{ width: '30rem' }} className="customLogin">
+    <Card
+      bg="dark"
+      text="white"
+      style={{ width: "30rem" }}
+      className="customLogin"
+    >
       <Card.Body>
         <center>
           <Card.Title>Login</Card.Title>
         </center>
         <Card.Text>
           <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Group className="mb-3">
               <Form.Label>Email address</Form.Label>
               <Form.Control
                 type="email"
@@ -56,7 +60,7 @@ function Login() {
               />
             </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formBasicPassword">
+            <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
               <Form.Control
                 type="password"
@@ -69,7 +73,8 @@ function Login() {
             <center>
               <Button variant="primary" type="submit">
                 Submit
-      </Button></center>
+              </Button>
+            </center>
           </Form>
         </Card.Text>
       </Card.Body>

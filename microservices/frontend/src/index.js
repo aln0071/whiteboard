@@ -15,7 +15,8 @@ axios.interceptors.response.use(
   function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Do something with response error
-    if (getErrorMessage(error).localeCompare("jwt must be provided") === 0) {
+    const errorMessage = getErrorMessage(error);
+    if (["jwt must be provided", "jwt expired"].includes(errorMessage)) {
       window.location.href = "/";
     }
     return Promise.reject(error);

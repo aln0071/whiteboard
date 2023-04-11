@@ -105,7 +105,13 @@ export default function PrivateDashboard() {
                 />
                 Shared with me
               </li>
-              <li className="navigable-item">
+              <li
+                onClick={() => navigate("recent")}
+                className={
+                  "navigable-item" +
+                  (location.pathname === "/private/recent" ? " selected" : "")
+                }
+              >
                 <FontAwesomeIcon
                   icon={faClock}
                   className="nav-item-icon"

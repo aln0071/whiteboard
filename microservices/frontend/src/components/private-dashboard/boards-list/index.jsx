@@ -30,20 +30,36 @@ export default function BoardsList({ tab }) {
     editorBoards: [],
     viewerBoards: [],
   });
+  const [recentBoardsList, setRecentBoardsList] = React.useState([]);
   React.useEffect(() => {
-    (async () => {
-      try {
-        const response = await axios.get(URLS.GET_BOARDS_LIST);
-        if (response.status === 200) {
-          setBoardsList(response.data);
-        } else {
-          throw new Error("Invalid response status: " + response.status);
+    if (tab === "recent") {
+      (async function getRecentBoardsList() {
+        try {
+          const response = await axios.get(URLS.GET_RECENT_BOARDS);
+          if (response.status === 200) {
+            setRecentBoardsList(response.data);
+          } else {
+            throw new Error("Invalid response status: " + response.status);
+          }
+        } catch (error) {
+          toast.error(getErrorMessage(error));
         }
-      } catch (error) {
-        toast.error(getErrorMessage(error));
-      }
-    })();
-  }, []);
+      })();
+    } else {
+      (async function getAllBoardsList() {
+        try {
+          const response = await axios.get(URLS.GET_BOARDS_LIST);
+          if (response.status === 200) {
+            setBoardsList(response.data);
+          } else {
+            throw new Error("Invalid response status: " + response.status);
+          }
+        } catch (error) {
+          toast.error(getErrorMessage(error));
+        }
+      })();
+    }
+  }, [tab]);
 
   const [currentSelectedBoard, setCurrentSelectedBoard] = React.useState();
   const [showShareModal, setShowShareModal] = React.useState(false);
@@ -266,6 +282,8 @@ export default function BoardsList({ tab }) {
         ...boardsList.viewerBoards,
       ].filter((board) => starredBoards.includes(board._id))
     );
+  } else if (tab === "recent") {
+    return renderBoardsList(recentBoardsList);
   }
   return <div>tab not defined</div>;
 }

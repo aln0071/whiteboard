@@ -170,6 +170,7 @@ app.get("/api/v1/board/recent", async (req, res, next) => {
       {
         $project: {
           name: 1,
+          owner: 1,
           useractivity: {
             $filter: {
               input: "$useractivity",
@@ -186,19 +187,26 @@ app.get("/api/v1/board/recent", async (req, res, next) => {
           "useractivity.timestamp": -1,
         },
       },
+      // {
+      //   $group: {
+      //     _id: "$_id",
+      //     name: { $first: "$name" },
+      //     useractivity: { $push: "$useractivity" },
+      //   },
+      // },
+      // {
+      //   $project: {
+      //     name: 1,
+      //     useractivity: {
+      //       $slice: ["$useractivity", 1],
+      //     },
+      //   },
+      // },
       {
         $group: {
           _id: "$_id",
           name: { $first: "$name" },
-          useractivity: { $push: "$useractivity" },
-        },
-      },
-      {
-        $project: {
-          name: 1,
-          useractivity: {
-            $slice: ["$useractivity", 1],
-          },
+          owner: { $first: "$owner" },
         },
       },
     ]);
