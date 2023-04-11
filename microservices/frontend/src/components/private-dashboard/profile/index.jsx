@@ -5,12 +5,20 @@ import { useEffect, useState } from 'react';
 // import 'font-awesome/css/font-awesome.min.css';
 import { getErrorMessage, URLS } from "../../../utils";
 import { useNavigate, useParams } from "react-router-dom";
+import PasswordReset from "../password-reset";
 import "./profile.css";
+import aws_config from "./aws_config"
+import S3FileUpload from 'react-s3';
+import { Buffer } from "buffer";
+Buffer.from("anything", "base64");
+window.Buffer = window.Buffer || require("buffer").Buffer;
 
 function Profile(props) {
   let params = useParams();
   let navigate = useNavigate();
   const [profileData, setProfile] = useState({});
+  const [showAnswerResponses, setShowAnswerResponses] = React.useState(false);
+  const config = aws_config
 
   useEffect(() => {
     (async () => {
@@ -31,17 +39,37 @@ function Profile(props) {
     e.preventDefault();
     navigate(`/profileedit`);
   }
+
   const submitHandler = function (e) {
     e.preventDefault();
     var formData = e.target
-    const user = {};
-    user.username = formData.formBasicUsername.value;
-    user.firstName = formData.formBasicFirstName.value;
-    user.lastName = formData.formBasicLastName.value;
-    user.image = formData.formFileSm.files[0];
-    axios.post(URLS.UPDATE_PROFILE_DETAILS, user, { 'Content-Type': 'multipart/form-data' })
-      .then(response => { console.log(response) })
+    const user = {}
+    console.log("1")
+    if (formData.formFileSm.files.length > 0) {
+      S3FileUpload
+        .uploadFile(formData.formFileSm.files[0], config)
+        .then(data => {
+          console.log(data)
+          user.image = data.location
+          user.username = formData.formBasicUsername.value
+          user.firstName = formData.formBasicFirstName.value
+          user.lastName = formData.formBasicLastName.value
+          axios.post(URLS.UPDATE_PROFILE_DETAILS, user, { 'Content-Type': 'multipart/form-data' })
+            .then(response => { console.log(response) })
+        })
+        .catch(err => console.error(err))
+    }
+    else {
+      user.username = formData.formBasicUsername.value
+      user.firstName = formData.formBasicFirstName.value
+      user.lastName = formData.formBasicLastName.value
+      axios.post(URLS.UPDATE_PROFILE_DETAILS, user, { 'Content-Type': 'multipart/form-data' })
+        .then(response => { console.log(response) })
+    }
+
   }
+  console.log("2")
+
 
   return (profileData != {} &&
     (<div>
@@ -86,7 +114,11 @@ function Profile(props) {
           <Button variant="primary" type="submit" className="button-save-changes">
             Save Changes
           </Button>
+          <Button onClick={() => setShowAnswerResponses(true)} className="button-save-changes">
+            Reset Password
+        </Button>
         </Row>
+        <PasswordReset username={profileData.username} isOpen={showAnswerResponses} closeModal={() => setShowAnswerResponses(false)} />
       </Form>
     </div>)
   );

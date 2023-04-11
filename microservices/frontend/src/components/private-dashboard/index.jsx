@@ -59,7 +59,7 @@ export default function PrivateDashboard() {
               />
               <Button variant="outline-secondary">Search</Button>
             </InputGroup>
-            <span className="profile-icon"></span>
+            {/* <span className="profile-icon"></span> */}
           </div>
           <div className="left-navigation">
             <ul className="left-nav-list">

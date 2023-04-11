@@ -87,18 +87,31 @@ app.get("/api/v1/authentication/getProfile", async (req, res, next) => {
 
 app.post("/api/v1/authentication/updateProfile", async (req, res, next) => {
   try {
-    const UserId = req.get("userid");
-    let userUpdate = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-    }
+    let userUpdate = {}
+    const id = req.body.username;
     if (req.body.image) {
       userUpdate.image = req.body.image
     }
-    await UserModel.findOneAndUpdate({ username: req.body.username },
-      { $set: userUpdate }, function (err) {
-        if (err) res.send(err);
-      })
+    if (req.body.firstName) {
+      userUpdate.firstName = req.body.firstName
+    }
+    if (req.body.lastName) {
+      userUpdate.lastName = req.body.lastName
+    }
+    if (req.body.newpassword) {
+      const existingUser = await UserModel.findOne({ id });
+      console.log(existingUser)
+      if (await bcrypt.compare(req.body.oldpassword, existingUser.password) === true) {
+        const hashedPassword = await bcrypt.hash(req.body.newpassword, 10);
+        userUpdate.password = hashedPassword
+      }
+      else {
+        console.log(existingUser.password, req.body.oldpassword)
+        res.status(400).send("Old password does not match the existing password of the user")
+      }
+    }
+    await UserModel.findOneAndUpdate({ id },
+      { $set: userUpdate })
     res.send("Successfully updated customer data");
     return next();
   } catch (error) {
