@@ -13,6 +13,7 @@ export const URLS = {
   CHAT_GPT_ASK_QUESTION: "/api/v1/chatgpt/prompt",
   FETCH_QUESTIONS: "/api/v1/board/fetchquestions",
   TOGGLE_STARRED: "/api/v1/authentication/toggleStarred/:id",
+  GET_RECENT_BOARDS: "/api/v1/board/recent",
 };
 
 export const getErrorMessage = (error) =>

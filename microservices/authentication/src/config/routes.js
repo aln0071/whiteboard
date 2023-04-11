@@ -51,6 +51,15 @@ const ROUTES = [
     },
   },
   {
+    url: "/api/v1/board/recent",
+    auth: true,
+    roles: ["user"],
+    proxy: {
+      target: TARGET_SERVICES.board,
+      changeOrigin: true,
+    },
+  },
+  {
     url: "/wbo/*",
     auth: true,
     roles: ["user"],
