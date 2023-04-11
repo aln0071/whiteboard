@@ -18,6 +18,12 @@ function getJwtTokenFromCookie(request) {
   return jwtToken;
 }
 
+async function getUserIdFromCookie(request) {
+  const jwtToken = getJwtTokenFromCookie(request);
+  const decodedToken = await jwt.verify(jwtToken, secret);
+  return decodedToken._id;
+}
+
 function generateAccessToken(user) {
   return jwt.sign(user, secret, { expiresIn: "15m" });
 }
@@ -32,6 +38,7 @@ module.exports = {
   getJwtTokenFromCookie,
   generateAccessToken,
   getErrorMessage,
+  getUserIdFromCookie,
   UserModel,
   URLS,
 };

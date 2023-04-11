@@ -148,6 +148,67 @@ app.get("/api/v1/board/list", async (req, res, next) => {
   }
 });
 
+app.get("/api/v1/board/recent", async (req, res, next) => {
+  try {
+    const userid = req.get("userid");
+    const userObjId = new mongoose.Types.ObjectId(userid);
+    const boards = await BoardModel.aggregate([
+      {
+        $match: {
+          $and: [
+            { "useractivity.userid": userObjId },
+            {
+              $or: [
+                { owner: userObjId },
+                { editors: userObjId },
+                { viewers: userObjId },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          useractivity: {
+            $filter: {
+              input: "$useractivity",
+              cond: { $eq: ["$$this.userid", userObjId] },
+            },
+          },
+        },
+      },
+      {
+        $unwind: "$useractivity",
+      },
+      {
+        $sort: {
+          "useractivity.timestamp": -1,
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          useractivity: { $push: "$useractivity" },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          useractivity: {
+            $slice: ["$useractivity", 1],
+          },
+        },
+      },
+    ]);
+    res.json(boards);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.put("/api/v1/board/logs/write", async (req, res, next) => {
   const logs = req.body;
   const boardnames = Object.keys(logs);

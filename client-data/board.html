@@ -121,9 +121,11 @@
 		// Get the <span> element that closes the modal
 		var span = document.getElementsByClassName("close")[0];
 
-		// When the user clicks the button, open the modal 
-		btn.onclick = function () {
-			modal.style.display = "block";
+		// When the user clicks the button, open the modal
+		if(btn) {
+			btn.onclick = function () {
+				modal.style.display = "block";
+			}
 		}
 
 		// When the user clicks on <span> (x), close the modal
@@ -202,7 +204,6 @@
 	<script src="../tools/mic/mic.js"></script>
 	<script src="../tools/question/question.js"></script>
 	<script src="../tools/endsession/endsession.js"></script>
-	<script src="../tools/question/modal.js"></script>
 	{{#moderator}}
 	<script src="../tools/clear/clear.js"></script>{{/moderator}}
 	<script src="../js/canvascolor.js"></script>

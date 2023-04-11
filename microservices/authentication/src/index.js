@@ -22,6 +22,7 @@ const {
   UserModel,
   URLS,
   getErrorMessage,
+  getUserIdFromCookie,
 } = require("./utils");
 
 app.use(/\/api\/v1\/authentication\/.*/, express.json());
@@ -75,10 +76,9 @@ app.get("/api/v1/authentication", (req, res) => {
 
 app.get("/api/v1/authentication/getProfile", async (req, res, next) => {
   try {
-    const UserId = req.get("userid");
-    const existingUser = await UserModel.findOne({ UserId });
-    res.send(existingUser);
-    console.log(userid, existingUser)
+    const UserId = await getUserIdFromCookie(req);
+    const existingUser = await UserModel.findById(UserId);
+    res.json(existingUser);
     return next();
   } catch (error) {
     next(error);
@@ -87,19 +87,21 @@ app.get("/api/v1/authentication/getProfile", async (req, res, next) => {
 
 app.post("/api/v1/authentication/updateProfile", async (req, res, next) => {
   try {
-    const UserId = req.get("userid");
-    let userUpdate = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-    }
+    const UserId = await getUserIdFromCookie(req);
+    const userUpdate = {
+      firstName: req.body.firstName || "",
+      lastName: req.body.lastName || "",
+    };
     if (req.body.image) {
-      userUpdate.image = req.body.image
+      userUpdate.image = req.body.image || "";
     }
-    await UserModel.findOneAndUpdate({ username: req.body.username },
-      { $set: userUpdate }, function (err) {
-        if (err) res.send(err);
-      })
-    res.send("Successfully updated customer data");
+    await UserModel.findOneAndUpdate(
+      { _id: new mongoose.Types.ObjectId(UserId) },
+      { $set: userUpdate }
+    );
+    res.json({
+      message: "Successfully updated user profile",
+    });
     return next();
   } catch (error) {
     next(error);
@@ -151,7 +153,7 @@ app.post("/api/v1/authentication/login", async (req, res, next) => {
       });
       res.json({
         user,
-        accessToken
+        accessToken,
       });
     } else {
       res.status(401).json({
