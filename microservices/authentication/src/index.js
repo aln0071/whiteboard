@@ -73,6 +73,39 @@ app.get("/api/v1/authentication", (req, res) => {
   });
 });
 
+app.get("/api/v1/authentication/getProfile", async (req, res, next) => {
+  try {
+    const UserId = req.get("userid");
+    const existingUser = await UserModel.findOne({ UserId });
+    res.send(existingUser);
+    console.log(userid, existingUser)
+    return next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/v1/authentication/updateProfile", async (req, res, next) => {
+  try {
+    const UserId = req.get("userid");
+    let userUpdate = {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+    }
+    if (req.body.image) {
+      userUpdate.image = req.body.image
+    }
+    await UserModel.findOneAndUpdate({ username: req.body.username },
+      { $set: userUpdate }, function (err) {
+        if (err) res.send(err);
+      })
+    res.send("Successfully updated customer data");
+    return next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/v1/authentication/register", async (req, res, next) => {
   try {
     const { email: username, password } = req.body;
@@ -117,7 +150,8 @@ app.post("/api/v1/authentication/login", async (req, res, next) => {
         httpOnly: true,
       });
       res.json({
-        accessToken,
+        user,
+        accessToken
       });
     } else {
       res.status(401).json({

@@ -1,0 +1,18 @@
+.button-save-changes {
+    width: 20%;
+    float: right;
+    margin-left: 75%;
+    margin-top: 2%;
+}
+
+.profile-right-pane {
+    width: 25rem;
+    border: transparent;
+    width: 80%;
+    margin: 2vh;
+}
+
+.profile-left-pane {
+    margin-top: 9vh;    
+    margin-left: 2vh;
+}

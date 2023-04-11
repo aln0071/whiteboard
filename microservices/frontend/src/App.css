@@ -538,3 +538,17 @@ body {
     background-image: radial-gradient(circle, black 1px, transparent 2px);
     background-size: 100% 33.33%;
 }
+
+.g-4 {
+    margin-left: 10rem !important;
+    text-align: center;
+}
+
+.customLogin {
+    margin-top: 30%;
+    margin-left: 2%;
+}
+
+.tabsCustom{
+    margin-top: 75%;
+}

@@ -4,6 +4,8 @@ export const URLS = {
   IS_LOGGED_IN: "/api/v1/authentication/isLoggedIn",
   LOGOUT: "/api/v1/authentication/logout",
   CREATE_BOARD: "/api/v1/board/create",
+  GET_PROFILE_DETAILS: "/api/v1/authentication/getProfile",
+  UPDATE_PROFILE_DETAILS: "/api/v1/authentication/updateProfile",
   GET_BOARDS_LIST: "/api/v1/board/list",
   EDIT_BOARD_SHARING_OPTIONS: "/api/v1/board/sharing/:id",
   REMOVE_ALL_EDIT_ACCESS: "/api/v1/board/removeEditAccess/:id",
