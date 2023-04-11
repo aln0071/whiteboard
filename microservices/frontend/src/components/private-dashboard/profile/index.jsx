@@ -102,6 +102,7 @@ function Profile(props) {
                 style={{ width: "200px", height: "200px" }}
               ></img>
               <Form.Group controlId="formFileSm" className="mb-3">
+                <br />
                 <Form.Control type="file" size="sm" />
               </Form.Group>
             </Col>
