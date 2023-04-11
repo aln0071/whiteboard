@@ -539,16 +539,26 @@ body {
     background-size: 100% 33.33%;
 }
 
-.g-4 {
-    margin-left: 10rem !important;
-    text-align: center;
+.public-dashboard-container {
+    display: grid;
+    grid-template-columns: 1fr 600px;
+    grid-template-rows: 1fr;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-content: center;
 }
 
-.customLogin {
-    margin-top: 30%;
-    margin-left: 2%;
+.public-dashboard-background {
+    overflow: hidden;
 }
 
-.tabsCustom{
-    margin-top: 75%;
+.public-dashboard-background > img {
+    min-height: 100vh;
+    min-width: 100%;
+}
+
+.login-and-register-forms {
+    justify-self: center;
+    align-self: center;
 }
