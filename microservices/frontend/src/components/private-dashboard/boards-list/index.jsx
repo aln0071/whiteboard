@@ -74,6 +74,19 @@ export default function BoardsList({ tab }) {
     setShowCtxtMenu(newCtxtStates);
   };
 
+  const copyLink = (boardName) => {
+    const text = `${window.location.origin}/wbo/boards/${boardName}`;
+    const type = "text/plain";
+    const blob = new Blob([text], { type });
+    const data = [new ClipboardItem({ [type]: blob })];
+    navigator.clipboard.write(data).then(
+      () => toast.success("Link copied"),
+      () => {
+        toast.error("Copying link failed");
+      }
+    );
+  };
+
   const [contextMenuStyles, setContextMenuStyles] = React.useState({});
   const renderBoardsList = (boards) => {
     return (
@@ -193,7 +206,7 @@ export default function BoardsList({ tab }) {
                           Share
                         </li>
                       )}
-                      <li>
+                      <li onClick={() => copyLink(board.name)}>
                         <FontAwesomeIcon
                           icon={faLink}
                           className="context-item-icon"
