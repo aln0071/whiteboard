@@ -52,11 +52,12 @@ const router = createBrowserRouter([
       try {
         const response = await axios.post(URLS.IS_LOGGED_IN);
         if (response.status === 200) {
-          const { _id, starred = [] } = response.data;
+          const { _id, starred = [], image } = response.data;
           store.dispatch(setStarredBoardsAction(starred));
           store.dispatch(
             setUserDetailsAction({
               _id,
+              image,
             })
           );
         } else {

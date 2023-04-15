@@ -409,6 +409,13 @@ body {
     border-radius: 100px;
     justify-self: right;
     align-self: center;
+    overflow: hidden;
+}
+
+.profile-icon > img {
+    width: 38px;
+    height: 38px;
+    border-radius: 100px;
 }
 
 .boards-list-container {

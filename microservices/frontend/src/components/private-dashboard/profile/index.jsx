@@ -8,9 +8,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import PasswordReset from "../password-reset";
 import { toast } from "react-toastify";
 import "./profile.css";
-import aws_config from "./aws_config"
-import S3FileUpload from 'react-s3';
+import aws_config from "./aws_config";
+import S3FileUpload from "react-s3";
 import { Buffer } from "buffer";
+import { setUserImageAction } from "../../../redux/actions/user";
+import { useDispatch, useSelector } from "react-redux";
 Buffer.from("anything", "base64");
 window.Buffer = window.Buffer || require("buffer").Buffer;
 
@@ -19,7 +21,8 @@ function Profile(props) {
   let navigate = useNavigate();
   const [profileData, setProfile] = useState({});
   const [showAnswerResponses, setShowAnswerResponses] = React.useState(false);
-  const config = aws_config
+  const config = aws_config;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     (async () => {
@@ -39,22 +42,21 @@ function Profile(props) {
   const profileEdit = function (e) {
     e.preventDefault();
     navigate(`/profileedit`);
-  }
+  };
 
   const submitHandler = function (e) {
     e.preventDefault();
-    var formData = e.target
-    const user = {}
-    console.log("1")
+    var formData = e.target;
+    const user = {};
+    console.log("1");
     if (formData.formFileSm.files.length > 0) {
-      S3FileUpload
-        .uploadFile(formData.formFileSm.files[0], config)
-        .then(data => {
-          console.log(data)
-          user.image = data.location
-          user.username = formData.formBasicUsername.value
-          user.firstName = formData.formBasicFirstName.value
-          user.lastName = formData.formBasicLastName.value
+      S3FileUpload.uploadFile(formData.formFileSm.files[0], config).then(
+        (data) => {
+          console.log(data);
+          user.image = data.location;
+          user.username = formData.formBasicUsername.value;
+          user.firstName = formData.formBasicFirstName.value;
+          user.lastName = formData.formBasicLastName.value;
           axios
             .post(URLS.UPDATE_PROFILE_DETAILS, user, {
               "Content-Type": "multipart/form-data",
@@ -62,6 +64,7 @@ function Profile(props) {
             .then((response) => {
               if (response.status === 200) {
                 toast.success(response.data.message);
+                dispatch(setUserImageAction(data.location));
               } else {
                 throw new Error("Invalid status code " + response.status);
               }
@@ -69,15 +72,16 @@ function Profile(props) {
             .catch((error) => {
               toast.error(getErrorMessage(error));
             });
+        }
+      );
+    } else {
+      user.username = formData.formBasicUsername.value;
+      user.firstName = formData.formBasicFirstName.value;
+      user.lastName = formData.formBasicLastName.value;
+      axios
+        .post(URLS.UPDATE_PROFILE_DETAILS, user, {
+          "Content-Type": "multipart/form-data",
         })
-    }
-    else {
-      user.username = formData.formBasicUsername.value
-      user.firstName = formData.formBasicFirstName.value
-      user.lastName = formData.formBasicLastName.value
-      axios.post(URLS.UPDATE_PROFILE_DETAILS, user, {
-        "Content-Type": "multipart/form-data",
-      })
         .then((response) => {
           if (response.status === 200) {
             toast.success(response.data.message);
@@ -89,7 +93,9 @@ function Profile(props) {
           toast.error(getErrorMessage(error));
         });
     }
-  }
+  };
+
+  const profileImageUrl = useSelector((state) => state.user.image);
 
   return (
     profileData != {} && (
@@ -98,7 +104,7 @@ function Profile(props) {
           <Row>
             <Col className="profile-left-pane">
               <img
-                src={profileData.image}
+                src={profileImageUrl}
                 style={{ width: "200px", height: "200px" }}
               ></img>
               <Form.Group controlId="formFileSm" className="mb-3">
@@ -149,20 +155,36 @@ function Profile(props) {
 
                 <Form.Group className="mb-3" controlId="formBasicLastName">
                   <Form.Label>Last Name</Form.Label>
-                  <Form.Control type="text" name="lastname" defaultValue={profileData.lastName} />
+                  <Form.Control
+                    type="text"
+                    name="lastname"
+                    defaultValue={profileData.lastName}
+                  />
                 </Form.Group>
               </Card>
             </Col>
-            <Button variant="primary" type="submit" className="button-save-changes">
+            <Button
+              variant="primary"
+              type="submit"
+              className="button-save-changes"
+            >
               Save Changes
-          </Button>
-            <Button onClick={() => setShowAnswerResponses(true)} className="button-save-changes">
+            </Button>
+            <Button
+              onClick={() => setShowAnswerResponses(true)}
+              className="button-save-changes"
+            >
               Reset Password
-        </Button>
+            </Button>
           </Row>
-          <PasswordReset username={profileData.username} isOpen={showAnswerResponses} closeModal={() => setShowAnswerResponses(false)} />
+          <PasswordReset
+            username={profileData.username}
+            isOpen={showAnswerResponses}
+            closeModal={() => setShowAnswerResponses(false)}
+          />
         </Form>
-      </div >)
+      </div>
+    )
   );
 }
 

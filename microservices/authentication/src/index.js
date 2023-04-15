@@ -96,21 +96,27 @@ app.post("/api/v1/authentication/updateProfile", async (req, res, next) => {
       userUpdate.image = req.body.image || "";
     }
     if (req.body.firstName) {
-      userUpdate.firstName = req.body.firstName
+      userUpdate.firstName = req.body.firstName;
     }
     if (req.body.lastName) {
-      userUpdate.lastName = req.body.lastName
+      userUpdate.lastName = req.body.lastName;
     }
     if (req.body.newpassword) {
       const existingUser = await UserModel.findOne({ id });
-      console.log(existingUser)
-      if (await bcrypt.compare(req.body.oldpassword, existingUser.password) === true) {
+      console.log(existingUser);
+      if (
+        (await bcrypt.compare(req.body.oldpassword, existingUser.password)) ===
+        true
+      ) {
         const hashedPassword = await bcrypt.hash(req.body.newpassword, 10);
-        userUpdate.password = hashedPassword
-      }
-      else {
-        console.log(existingUser.password, req.body.oldpassword)
-        res.status(400).send("Old password does not match the existing password of the user")
+        userUpdate.password = hashedPassword;
+      } else {
+        console.log(existingUser.password, req.body.oldpassword);
+        res
+          .status(400)
+          .send(
+            "Old password does not match the existing password of the user"
+          );
       }
     }
     await UserModel.findOneAndUpdate(
@@ -198,6 +204,7 @@ app.post("/api/v1/authentication/isLoggedIn", async (req, res, next) => {
     const decodedToken = await jwt.verify(jwtToken, secret);
     const starredBoards = await UserModel.findById(decodedToken._id, [
       "starred",
+      "image",
     ]);
     res.json(starredBoards);
   } catch (error) {

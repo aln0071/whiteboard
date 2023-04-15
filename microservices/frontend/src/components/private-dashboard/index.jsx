@@ -18,6 +18,7 @@ import {
   faUser,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
+import { useSelector } from "react-redux";
 
 export default function PrivateDashboard() {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ export default function PrivateDashboard() {
   };
 
   const [showNewBoardModal, setShowNewBoardModal] = React.useState(false);
+  const profileImageUrl = useSelector((state) => state.user.image);
 
   return (
     <>
@@ -59,7 +61,9 @@ export default function PrivateDashboard() {
               />
               <Button variant="outline-secondary">Search</Button>
             </InputGroup>
-            {/* <span className="profile-icon"></span> */}
+            <span className="profile-icon">
+              <img src={profileImageUrl} />
+            </span>
           </div>
           <div className="left-navigation">
             <ul className="left-nav-list">

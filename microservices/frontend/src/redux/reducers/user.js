@@ -1,7 +1,8 @@
-import { SET_USER_DETAILS } from "../actions/types";
+import { SET_USER_DETAILS, SET_USER_IMAGE } from "../actions/types";
 
 const initialState = {
-  userid: "",
+  _id: "",
+  image: "",
 };
 
 export default function user(state = initialState, action) {
@@ -10,6 +11,11 @@ export default function user(state = initialState, action) {
     case SET_USER_DETAILS:
       return {
         ...payload,
+      };
+    case SET_USER_IMAGE:
+      return {
+        ...state,
+        image: payload,
       };
     default:
       return state;
