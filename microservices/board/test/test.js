@@ -212,5 +212,23 @@ describe("Test Suites : ", function () {
                 .catch((err) => {
                     done(err)
                 });
+        }),
+        it("GET API : /board/sharinglist/testBoard", (done) => {
+            axios.get(apiUrl + "/board/sharinglist/testBoard",
+                {
+                    headers: {
+                        Cookie: "jwtToken=" + accessToken
+                    }
+                }
+            )
+                .then((response) => {
+                    console.log(response.data)
+                    assert.equal(response.status, 200);
+                    console.log(response.data)
+                    done()
+                })
+                .catch((err) => {
+                    done(err)
+                });
         })
 });

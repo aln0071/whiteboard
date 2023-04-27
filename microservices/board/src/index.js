@@ -153,6 +153,34 @@ app.get("/api/v1/board/list", async (req, res, next) => {
   }
 });
 
+app.get("/api/v1/board/sharinglist/:boardName", async (req, res, next) => {
+  const boardname = req.params.boardName
+  try {
+    const subList = {};
+    const ownBoardsList = await BoardModel.findOne({ name: boardname }).populate('viewers').populate('editors')
+    if (ownBoardsList.viewers) {
+      ownBoardsList.viewers.map(viewer => {
+        var v = viewer.username
+        subList[v] = 'viewer'
+      })
+    }
+
+    if (ownBoardsList.editors) {
+      ownBoardsList.editors.map(editor => {
+        var e = editor.username
+        subList[e] = 'editor'
+      })
+    }
+
+    res.json({
+      subList: subList
+    });
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get("/api/v1/board/recent", async (req, res, next) => {
   try {
     const userid = await getUserIdFromCookie(req);
