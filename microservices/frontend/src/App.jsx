@@ -19,6 +19,7 @@ import store from "./redux/store";
 import { setStarredBoardsAction } from "./redux/actions/starredBoards";
 import { setUserDetailsAction } from "./redux/actions/user";
 import Profile from "./components/private-dashboard/profile";
+import Loader from "./components/loader";
 
 const publicPathLoader = async () => {
   try {
@@ -90,6 +91,10 @@ const router = createBrowserRouter([
         path: "recent",
         element: <BoardsList tab="recent" />,
       },
+      {
+        path: "trash",
+        element: <BoardsList tab="trash" />,
+      },
     ],
   },
 ]);
@@ -98,6 +103,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
+        <Loader />
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

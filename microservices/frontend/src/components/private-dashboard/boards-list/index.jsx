@@ -13,9 +13,15 @@ import {
   faChartLine,
   faQuestion,
   faTrashCan,
+  faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { toggleStarredBoardAction } from "../../../redux/actions/starredBoards";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  hideLoaderAction,
+  showLoaderAction,
+} from "../../../redux/actions/loader";
+import { getAllBoardsListAction } from "../../../redux/actions/boards";
 
 export default function BoardsList({ tab }) {
   const dispatch = useDispatch();
@@ -25,40 +31,67 @@ export default function BoardsList({ tab }) {
   ]);
   const [showCtxtMenu, setShowCtxtMenu] = React.useState({});
   const hardNavigate = (location) => (window.location.href = location);
-  const [boardsList, setBoardsList] = React.useState({
-    ownBoards: [],
-    editorBoards: [],
-    viewerBoards: [],
-  });
+  // const [boardsList, setBoardsList] = React.useState({
+  //   ownBoards: [],
+  //   editorBoards: [],
+  //   viewerBoards: [],
+  // });
+  const boardsList = useSelector((state) => state.boards);
   const [recentBoardsList, setRecentBoardsList] = React.useState([]);
-  React.useEffect(() => {
-    if (tab === "recent") {
-      (async function getRecentBoardsList() {
-        try {
-          const response = await axios.get(URLS.GET_RECENT_BOARDS);
-          if (response.status === 200) {
-            setRecentBoardsList(response.data);
-          } else {
-            throw new Error("Invalid response status: " + response.status);
-          }
-        } catch (error) {
-          toast.error(getErrorMessage(error));
-        }
-      })();
-    } else {
-      (async function getAllBoardsList() {
-        try {
-          const response = await axios.get(URLS.GET_BOARDS_LIST);
-          if (response.status === 200) {
-            setBoardsList(response.data);
-          } else {
-            throw new Error("Invalid response status: " + response.status);
-          }
-        } catch (error) {
-          toast.error(getErrorMessage(error));
-        }
-      })();
+  const [trashBoardsList, setTrashBoardsList] = React.useState([]);
+
+  async function getTrashBoardsList() {
+    try {
+      const response = await axios.get(URLS.GET_TRASH_BOARDS);
+      if (response.status === 200) {
+        setTrashBoardsList(response.data);
+      } else {
+        throw new Error("Invalid response status: " + response.status);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     }
+  }
+
+  async function getRecentBoardsList() {
+    try {
+      const response = await axios.get(URLS.GET_RECENT_BOARDS);
+      if (response.status === 200) {
+        setRecentBoardsList(response.data);
+      } else {
+        throw new Error("Invalid response status: " + response.status);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  }
+
+  // async function getAllBoardsList() {
+  //   try {
+  //     const response = await axios.get(URLS.GET_BOARDS_LIST);
+  //     if (response.status === 200) {
+  //       setBoardsList(response.data);
+  //     } else {
+  //       throw new Error("Invalid response status: " + response.status);
+  //     }
+  //   } catch (error) {
+  //     toast.error(getErrorMessage(error));
+  //   }
+  // }
+
+  function initializeData() {
+    if (tab === "recent") {
+      return getRecentBoardsList();
+    } else if (tab === "trash") {
+      return getTrashBoardsList();
+    } else {
+      // return getAllBoardsList();
+      return dispatch(getAllBoardsListAction());
+    }
+  }
+
+  React.useEffect(() => {
+    initializeData();
   }, [tab]);
 
   const [currentSelectedBoard, setCurrentSelectedBoard] = React.useState();
@@ -87,6 +120,41 @@ export default function BoardsList({ tab }) {
     );
   };
 
+  const toggleMoveToTrash = async (boardid) => {
+    try {
+      const response = await axios.put(
+        URLS.TOGGLE_TRASH.replace(":id", boardid)
+      );
+      if (response.status !== 200) {
+        throw new Error("Invalid response status: " + response.status);
+      } else {
+        await initializeData();
+        toast.success(response.data.message);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  };
+
+  const deleteForever = async (boardid) => {
+    try {
+      dispatch(showLoaderAction());
+      const response = await axios.delete(
+        URLS.DELETE_FOREVER.replace(":id", boardid)
+      );
+      if (response.status !== 200) {
+        throw new Error("Invalid response status: " + response.status);
+      } else {
+        await initializeData();
+        toast.success(response.data.message);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      dispatch(hideLoaderAction());
+    }
+  };
+
   const [contextMenuStyles, setContextMenuStyles] = React.useState({});
   const renderBoardsList = (boards) => {
     return (
@@ -109,11 +177,12 @@ export default function BoardsList({ tab }) {
           />
         </>
         {boards.map((board) => {
+          const isOwner = board.owner === user._id;
+          const isMarkedForRemoval = board.markedForDeletionAt !== undefined;
           const isBoardStarred = starredBoards.includes(board._id);
           const toggleStarredContextMenuOptionText = isBoardStarred
             ? "Remove from starred"
             : "Add to starred";
-          const isOwner = board.owner === user._id;
           return (
             <div
               key={board._id}
@@ -195,7 +264,7 @@ export default function BoardsList({ tab }) {
                     style={contextMenuStyles}
                   >
                     <ul className="board-context-menu-list">
-                      {isOwner && (
+                      {isOwner && !isMarkedForRemoval && (
                         <li onClick={() => setShowShareModal(true)}>
                           <FontAwesomeIcon
                             icon={faUserPlus}
@@ -215,19 +284,21 @@ export default function BoardsList({ tab }) {
                         />
                         Copy link
                       </li>
-                      <li
-                        onClick={() =>
-                          dispatch(toggleStarredBoardAction(board._id))
-                        }
-                      >
-                        <FontAwesomeIcon
-                          icon={faStar}
-                          className="context-item-icon"
-                          size="xs"
-                          fixedWidth
-                        />
-                        {toggleStarredContextMenuOptionText}
-                      </li>
+                      {!isMarkedForRemoval && (
+                        <li
+                          onClick={() =>
+                            dispatch(toggleStarredBoardAction(board._id))
+                          }
+                        >
+                          <FontAwesomeIcon
+                            icon={faStar}
+                            className="context-item-icon"
+                            size="xs"
+                            fixedWidth
+                          />
+                          {toggleStarredContextMenuOptionText}
+                        </li>
+                      )}
                       {isOwner && (
                         <>
                           <li onClick={() => setShowAnalyticsModal(true)}>
@@ -252,15 +323,39 @@ export default function BoardsList({ tab }) {
                             />
                             Answer Responses
                           </li>
-                          <li>
-                            <FontAwesomeIcon
-                              icon={faTrashCan}
-                              className="context-item-icon"
-                              size="xs"
-                              fixedWidth
-                            />
-                            Remove
-                          </li>
+                          {!isMarkedForRemoval && (
+                            <li onClick={() => toggleMoveToTrash(board._id)}>
+                              <FontAwesomeIcon
+                                icon={faTrashCan}
+                                className="context-item-icon"
+                                size="xs"
+                                fixedWidth
+                              />
+                              Remove
+                            </li>
+                          )}
+                          {isMarkedForRemoval && (
+                            <>
+                              <li onClick={() => toggleMoveToTrash(board._id)}>
+                                <FontAwesomeIcon
+                                  icon={faClockRotateLeft}
+                                  className="context-item-icon"
+                                  size="xs"
+                                  fixedWidth
+                                />
+                                Restore
+                              </li>
+                              <li onClick={() => deleteForever(board._id)}>
+                                <FontAwesomeIcon
+                                  icon={faTrashCan}
+                                  className="context-item-icon"
+                                  size="xs"
+                                  fixedWidth
+                                />
+                                Delete forever
+                              </li>
+                            </>
+                          )}
                         </>
                       )}
                     </ul>
@@ -297,6 +392,8 @@ export default function BoardsList({ tab }) {
     );
   } else if (tab === "recent") {
     return renderBoardsList(recentBoardsList);
+  } else if (tab === "trash") {
+    return renderBoardsList(trashBoardsList);
   }
   return <div>tab not defined</div>;
 }

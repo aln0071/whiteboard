@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const axios = require("axios");
 const port = process.env.PORT || 3000;
 
 const { DB_URI } = require("./config");
@@ -125,18 +126,18 @@ app.get("/api/v1/board/getusers/:boardname", async (req, res, next) => {
 app.get("/api/v1/board/list", async (req, res, next) => {
   const userid = req.get("userid");
   try {
-    const ownBoardsList = await BoardModel.find({ owner: userid }, [
-      "name",
-      "owner",
-    ]);
-    const editorBoardsList = await BoardModel.find({ editors: userid }, [
-      "name",
-      "owner",
-    ]);
-    const viewerBoardsList = await BoardModel.find({ viewers: userid }, [
-      "name",
-      "owner",
-    ]);
+    const ownBoardsList = await BoardModel.find(
+      { owner: userid, markedForDeletionAt: undefined },
+      ["name", "owner"]
+    );
+    const editorBoardsList = await BoardModel.find(
+      { editors: userid, markedForDeletionAt: undefined },
+      ["name", "owner"]
+    );
+    const viewerBoardsList = await BoardModel.find(
+      { viewers: userid, markedForDeletionAt: undefined },
+      ["name", "owner"]
+    );
     res.json({
       ownBoards: ownBoardsList || [],
       editorBoards: editorBoardsList || [],
@@ -159,9 +160,9 @@ app.get("/api/v1/board/recent", async (req, res, next) => {
             { "useractivity.userid": userObjId },
             {
               $or: [
-                { owner: userObjId },
-                { editors: userObjId },
-                { viewers: userObjId },
+                { owner: userObjId, markedForDeletionAt: undefined },
+                { editors: userObjId, markedForDeletionAt: undefined },
+                { viewers: userObjId, markedForDeletionAt: undefined },
               ],
             },
           ],
@@ -325,6 +326,77 @@ app.put("/api/v1/board/removeEditAccess/:id", async (req, res, next) => {
       await board.save();
       res.json({});
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.put("/api/v1/board/delete/mark/:id", async (req, res, next) => {
+  const boardid = req.params.id;
+  const userid = req.get("userid");
+  try {
+    const board = await BoardModel.findById(boardid);
+    if (board === null) {
+      throw new Error("Board with this id does not exist");
+    } else {
+      if (board.owner.toString() !== userid) {
+        throw new Error("Only owner can remove boards");
+      }
+      if (board.markedForDeletionAt === undefined) {
+        board.markedForDeletionAt = new Date();
+        await board.save();
+        res.json({
+          message: "Board moved to trash",
+        });
+      } else {
+        board.markedForDeletionAt = undefined;
+        await board.save();
+        res.json({
+          message: "Board restored",
+        });
+      }
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/v1/board/delete/:id", async (req, res, next) => {
+  const userid = req.get("userid");
+  const boardid = req.params.id;
+  try {
+    const board = await BoardModel.findById(boardid);
+    if (board === null) {
+      throw new Error("Board not found");
+    } else if (board.owner.toString() !== userid) {
+      throw new Error("Only owner can delete board");
+    } else {
+      await axios.delete("http://www:80/delete/" + board.name, {
+        headers: {
+          Cookie: req.headers.cookie,
+        },
+      });
+      await board.delete();
+      res.json({
+        message: "Board deleted",
+      });
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/v1/board/trash", async (req, res, next) => {
+  const userid = req.get("userid");
+  try {
+    const boards = await BoardModel.find({
+      owner: userid,
+      markedForDeletionAt: { $exists: true },
+    });
+    res.json(boards);
+    next();
   } catch (error) {
     next(error);
   }

@@ -6,13 +6,21 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../../utils";
 import crypto from "crypto";
+import { useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { getAllBoardsListAction } from "../../../redux/actions/boards";
 
 export default function CreateNewBoardModal({ isOpen, closeModal }) {
+  const dispatch = useDispatch();
+  const location = useLocation();
   const createWhiteboardWithName = async (name) => {
     try {
       const response = await axios.post(`${URLS.CREATE_BOARD}/${name}`);
       if (response.status === 200) {
         toast.success("Success: board created!");
+        if (location.pathname === "/private/dashboard") {
+          dispatch(getAllBoardsListAction());
+        }
         handleCloseModal();
       }
     } catch (error) {

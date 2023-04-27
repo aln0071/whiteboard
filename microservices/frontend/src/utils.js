@@ -14,6 +14,9 @@ export const URLS = {
   FETCH_QUESTIONS: "/api/v1/board/fetchquestions",
   TOGGLE_STARRED: "/api/v1/authentication/toggleStarred/:id",
   GET_RECENT_BOARDS: "/api/v1/board/recent",
+  GET_TRASH_BOARDS: "/api/v1/board/trash",
+  TOGGLE_TRASH: "/api/v1/board/delete/mark/:id",
+  DELETE_FOREVER: "/api/v1/board/delete/:id",
 };
 
 export const getErrorMessage = (error) =>

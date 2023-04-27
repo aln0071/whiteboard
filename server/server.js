@@ -28,7 +28,7 @@ if (parseFloat(process.versions.node) < MIN_NODE_VERSION) {
 
 check_output_directory(config.HISTORY_DIR);
 
-sockets.start(app);
+const io = sockets.start(app);
 
 app.listen(config.PORT, config.HOST);
 log("server started", { port: config.PORT });
@@ -126,6 +126,51 @@ async function handleRequest(request, response) {
   }
 
   switch (parts[0]) {
+    case "delete":
+      try {
+        const boardname = parts[1];
+        io.to(boardname).emit("redirectToHome");
+        // io.of("/").in(boardname).socketsLeave(boardname);
+        const boardFilePath = path.join(
+          config.HISTORY_DIR,
+          "board-" + boardname + ".json"
+        );
+        function deleteBoardFile() {
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              fs.unlink(boardFilePath, (err) => {
+                if (err) {
+                  if (err.message.includes("no such file or directory")) {
+                    resolve("File deleted");
+                  } else {
+                    reject(err);
+                  }
+                } else {
+                  resolve("File deleted");
+                }
+              });
+            }, 5000);
+          });
+        }
+        const unlinkResponse = await deleteBoardFile();
+        response.writeHead(200, "reached delete endpoint");
+        const responseData = {
+          message: unlinkResponse,
+        };
+        const jsonContent = JSON.stringify(responseData);
+        response.end(jsonContent);
+      } catch (error) {
+        console.trace(error);
+        response.writeHead(400, "Delete failed", {
+          "Content-type": "application/json",
+        });
+        const errorDetails = {
+          message: "Delete failed",
+        };
+        response.end(JSON.stringify(errorDetails));
+      }
+      break;
+
     case "boards":
       // "boards" refers to the root directory
       if (parts.length === 1) {

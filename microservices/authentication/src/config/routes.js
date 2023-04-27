@@ -60,6 +60,33 @@ const ROUTES = [
     },
   },
   {
+    url: "/api/v1/board/delete/mark/:id",
+    auth: true,
+    roles: ["user"],
+    proxy: {
+      target: TARGET_SERVICES.board,
+      changeOrigin: true,
+    },
+  },
+  {
+    url: "/api/v1/board/delete/:id",
+    auth: true,
+    roles: ["user"],
+    proxy: {
+      target: TARGET_SERVICES.board,
+      changeOrigin: true,
+    },
+  },
+  {
+    url: "/api/v1/board/trash",
+    auth: true,
+    roles: ["user"],
+    proxy: {
+      target: TARGET_SERVICES.board,
+      changeOrigin: true,
+    },
+  },
+  {
     url: "/wbo/*",
     auth: true,
     roles: ["user"],
