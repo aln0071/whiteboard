@@ -14,6 +14,13 @@ function ShareBoard({ isOpen, closeModal, board }) {
   const [users, setUsers] = React.useState({});
   const [currentUser, setCurrentUser] = React.useState("");
 
+  React.useEffect(() => {
+    if (board) {
+      const url = URLS.BOARD_SHARING_OPTIONS.replace(":boardName", board.name);
+      axios.get(url).then((response) => setUsers(response.data.subList));
+    }
+  }, [board]);
+
   const handleClose = () => closeModal();
 
   const handleAddUser = () => {
@@ -40,8 +47,6 @@ function ShareBoard({ isOpen, closeModal, board }) {
     }
   };
 
-  React.useEffect(() => {}, [board]);
-
   return (
     <>
       <Modal show={isOpen} onHide={handleClose}>
@@ -51,6 +56,22 @@ function ShareBoard({ isOpen, closeModal, board }) {
         <Modal.Body>
           Do not forget to save changes before closing the modal.
           <hr />
+          <InputGroup className="mb-3">
+            <Form.Control
+              placeholder="Recipient's username"
+              aria-label="Recipient's username"
+              aria-describedby="basic-addon2"
+              value={currentUser}
+              onChange={(e) => setCurrentUser(e.target.value)}
+            />
+            <Button
+              variant="outline-secondary"
+              id="button-addon2"
+              onClick={handleAddUser}
+            >
+              Add
+            </Button>
+          </InputGroup>
           <ul>
             {Object.keys(users).map((username) => {
               const role = users[username];
@@ -101,22 +122,6 @@ function ShareBoard({ isOpen, closeModal, board }) {
               );
             })}
           </ul>
-          <InputGroup className="mb-3">
-            <Form.Control
-              placeholder="Recipient's username"
-              aria-label="Recipient's username"
-              aria-describedby="basic-addon2"
-              value={currentUser}
-              onChange={(e) => setCurrentUser(e.target.value)}
-            />
-            <Button
-              variant="outline-secondary"
-              id="button-addon2"
-              onClick={handleAddUser}
-            >
-              Add
-            </Button>
-          </InputGroup>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

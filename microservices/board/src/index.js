@@ -53,10 +53,7 @@ app.post("/api/v1/board/question", async (req, res, next) => {
         questions: [id],
       },
     };
-    let board = await BoardModel.updateOne(
-      findboardCondition,
-      ansupdateCondition
-    );
+    await BoardModel.updateOne(findboardCondition, ansupdateCondition);
     res.send(id);
     res.sendStatus(200);
   } catch (error) {
@@ -69,7 +66,7 @@ app.post("/api/v1/board/answer", async (req, res, next) => {
   try {
     const newAnswer = {};
     newAnswer.answer = answer.description;
-    newAnswer.userId = answer.userId;
+    newAnswer.userId = req.get("userid");
     const findboardCondition = {
       _id: answer.questionId,
     };
@@ -94,7 +91,6 @@ app.post("/api/v1/board/fetchquestions", async (req, res, next) => {
     const question = await BoardModel.find(findboardCondition).populate(
       "questions"
     );
-    console.log("fetching check", question);
     res.send(question);
   } catch (error) {
     next(error);
@@ -142,6 +138,36 @@ app.get("/api/v1/board/list", async (req, res, next) => {
       ownBoards: ownBoardsList || [],
       editorBoards: editorBoardsList || [],
       viewerBoards: viewerBoardsList || [],
+    });
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/v1/board/sharinglist/:boardName", async (req, res, next) => {
+  const boardname = req.params.boardName;
+  try {
+    const subList = {};
+    const ownBoardsList = await BoardModel.findOne({ name: boardname })
+      .populate("viewers")
+      .populate("editors");
+    if (ownBoardsList.viewers) {
+      ownBoardsList.viewers.map((viewer) => {
+        var v = viewer.username;
+        subList[v] = "viewer";
+      });
+    }
+
+    if (ownBoardsList.editors) {
+      ownBoardsList.editors.map((editor) => {
+        var e = editor.username;
+        subList[e] = "editor";
+      });
+    }
+
+    res.json({
+      subList: subList,
     });
     next();
   } catch (error) {

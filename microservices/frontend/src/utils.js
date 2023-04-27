@@ -8,6 +8,7 @@ export const URLS = {
   UPDATE_PROFILE_DETAILS: "/api/v1/authentication/updateProfile",
   GET_BOARDS_LIST: "/api/v1/board/list",
   EDIT_BOARD_SHARING_OPTIONS: "/api/v1/board/sharing/:id",
+  BOARD_SHARING_OPTIONS: "/api/v1/board/sharinglist/:boardName",
   REMOVE_ALL_EDIT_ACCESS: "/api/v1/board/removeEditAccess/:id",
   GET_BOARD_ANALYTICS: "/api/v1/board/logs/:id",
   CHAT_GPT_ASK_QUESTION: "/api/v1/chatgpt/prompt",

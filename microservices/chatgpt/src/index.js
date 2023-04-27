@@ -43,4 +43,4 @@ app.use((err, req, res, next) => {
   res.json({ error: getErrorMessage(err) });
 });
 
-app.listen(port, () => console.log(`[board] listening on port ${port}`));
+app.listen(port, () => console.log(`[chatgpt] listening on port ${port}`));
