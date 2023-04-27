@@ -9,7 +9,7 @@ const UserModel = mongoose.model("User", UserSchema);
 const QuestionModel = mongoose.model("Question", QuestionSchema);
 
 
-describe("GET - get boards of a particular name", function () {
+describe("Test Suites : ", function () {
     var accessToken;
     var testBoardId;
     var testQuestionId;
