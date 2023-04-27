@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const axios = require("axios");
 const port = process.env.PORT || 3000;
 
 const { DB_URI } = require("./config");
@@ -11,9 +12,6 @@ const { BoardSchema, UserSchema, QuestionSchema } = require("app-models");
 const BoardModel = mongoose.model("Board", BoardSchema);
 const UserModel = mongoose.model("User", UserSchema);
 const QuestionModel = mongoose.model("Question", QuestionSchema);
-const {
-  getUserIdFromCookie,
-} = require("./utils");
 
 app.use(express.json());
 
@@ -31,10 +29,8 @@ app.post("/api/v1/board/create/:boardname", async (req, res, next) => {
   try {
     const newBoard = new BoardModel();
     newBoard.name = boardname;
-    newBoard.owner = await getUserIdFromCookie(req);
-    console.log("newBoard.owner : ", newBoard.owner)
-    const result = await newBoard.save();
-    res.send(result._id)
+    newBoard.owner = req.get("userid");
+    await newBoard.save();
     res.sendStatus(200);
   } catch (error) {
     next(error);
@@ -57,10 +53,7 @@ app.post("/api/v1/board/question", async (req, res, next) => {
         questions: [id],
       },
     };
-    let board = await BoardModel.updateOne(
-      findboardCondition,
-      ansupdateCondition
-    );
+    await BoardModel.updateOne(findboardCondition, ansupdateCondition);
     res.send(id);
     res.sendStatus(200);
   } catch (error) {
@@ -73,7 +66,7 @@ app.post("/api/v1/board/answer", async (req, res, next) => {
   try {
     const newAnswer = {};
     newAnswer.answer = answer.description;
-    newAnswer.userId = await getUserIdFromCookie(req);
+    newAnswer.userId = req.get("userid");
     const findboardCondition = {
       _id: answer.questionId,
     };
@@ -98,7 +91,6 @@ app.post("/api/v1/board/fetchquestions", async (req, res, next) => {
     const question = await BoardModel.find(findboardCondition).populate(
       "questions"
     );
-    console.log("fetching check", question);
     res.send(question);
   } catch (error) {
     next(error);
@@ -128,20 +120,20 @@ app.get("/api/v1/board/getusers/:boardname", async (req, res, next) => {
 });
 
 app.get("/api/v1/board/list", async (req, res, next) => {
-  const userid = await getUserIdFromCookie(req);
+  const userid = req.get("userid");
   try {
-    const ownBoardsList = await BoardModel.find({ owner: userid }, [
-      "name",
-      "owner",
-    ]);
-    const editorBoardsList = await BoardModel.find({ editors: userid }, [
-      "name",
-      "owner",
-    ]);
-    const viewerBoardsList = await BoardModel.find({ viewers: userid }, [
-      "name",
-      "owner",
-    ]);
+    const ownBoardsList = await BoardModel.find(
+      { owner: userid, markedForDeletionAt: undefined },
+      ["name", "owner"]
+    );
+    const editorBoardsList = await BoardModel.find(
+      { editors: userid, markedForDeletionAt: undefined },
+      ["name", "owner"]
+    );
+    const viewerBoardsList = await BoardModel.find(
+      { viewers: userid, markedForDeletionAt: undefined },
+      ["name", "owner"]
+    );
     res.json({
       ownBoards: ownBoardsList || [],
       editorBoards: editorBoardsList || [],
@@ -154,26 +146,28 @@ app.get("/api/v1/board/list", async (req, res, next) => {
 });
 
 app.get("/api/v1/board/sharinglist/:boardName", async (req, res, next) => {
-  const boardname = req.params.boardName
+  const boardname = req.params.boardName;
   try {
     const subList = {};
-    const ownBoardsList = await BoardModel.findOne({ name: boardname }).populate('viewers').populate('editors')
+    const ownBoardsList = await BoardModel.findOne({ name: boardname })
+      .populate("viewers")
+      .populate("editors");
     if (ownBoardsList.viewers) {
-      ownBoardsList.viewers.map(viewer => {
-        var v = viewer.username
-        subList[v] = 'viewer'
-      })
+      ownBoardsList.viewers.map((viewer) => {
+        var v = viewer.username;
+        subList[v] = "viewer";
+      });
     }
 
     if (ownBoardsList.editors) {
-      ownBoardsList.editors.map(editor => {
-        var e = editor.username
-        subList[e] = 'editor'
-      })
+      ownBoardsList.editors.map((editor) => {
+        var e = editor.username;
+        subList[e] = "editor";
+      });
     }
 
     res.json({
-      subList: subList
+      subList: subList,
     });
     next();
   } catch (error) {
@@ -183,7 +177,7 @@ app.get("/api/v1/board/sharinglist/:boardName", async (req, res, next) => {
 
 app.get("/api/v1/board/recent", async (req, res, next) => {
   try {
-    const userid = await getUserIdFromCookie(req);
+    const userid = req.get("userid");
     const userObjId = new mongoose.Types.ObjectId(userid);
     const boards = await BoardModel.aggregate([
       {
@@ -192,9 +186,9 @@ app.get("/api/v1/board/recent", async (req, res, next) => {
             { "useractivity.userid": userObjId },
             {
               $or: [
-                { owner: userObjId },
-                { editors: userObjId },
-                { viewers: userObjId },
+                { owner: userObjId, markedForDeletionAt: undefined },
+                { editors: userObjId, markedForDeletionAt: undefined },
+                { viewers: userObjId, markedForDeletionAt: undefined },
               ],
             },
           ],
@@ -276,7 +270,7 @@ app.put("/api/v1/board/logs/write", async (req, res, next) => {
 
 app.get("/api/v1/board/logs/:id", async (req, res, next) => {
   const boardid = req.params.id;
-  const userid = await getUserIdFromCookie(req);
+  const userid = req.get("userid");
   try {
     const board = await BoardModel.findById(boardid, ["useractivity", "owner"]);
     if (board === null) {
@@ -292,7 +286,7 @@ app.get("/api/v1/board/logs/:id", async (req, res, next) => {
 });
 
 app.put("/api/v1/board/sharing/:id", async (req, res, next) => {
-  const userid = await getUserIdFromCookie(req);
+  const userid = req.get("userid");
   const boardid = req.params.id;
   try {
     const board = await BoardModel.findById(boardid);
@@ -358,6 +352,77 @@ app.put("/api/v1/board/removeEditAccess/:id", async (req, res, next) => {
       await board.save();
       res.json({});
     }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.put("/api/v1/board/delete/mark/:id", async (req, res, next) => {
+  const boardid = req.params.id;
+  const userid = req.get("userid");
+  try {
+    const board = await BoardModel.findById(boardid);
+    if (board === null) {
+      throw new Error("Board with this id does not exist");
+    } else {
+      if (board.owner.toString() !== userid) {
+        throw new Error("Only owner can remove boards");
+      }
+      if (board.markedForDeletionAt === undefined) {
+        board.markedForDeletionAt = new Date();
+        await board.save();
+        res.json({
+          message: "Board moved to trash",
+        });
+      } else {
+        board.markedForDeletionAt = undefined;
+        await board.save();
+        res.json({
+          message: "Board restored",
+        });
+      }
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete("/api/v1/board/delete/:id", async (req, res, next) => {
+  const userid = req.get("userid");
+  const boardid = req.params.id;
+  try {
+    const board = await BoardModel.findById(boardid);
+    if (board === null) {
+      throw new Error("Board not found");
+    } else if (board.owner.toString() !== userid) {
+      throw new Error("Only owner can delete board");
+    } else {
+      await axios.delete("http://www:80/delete/" + board.name, {
+        headers: {
+          Cookie: req.headers.cookie,
+        },
+      });
+      await board.delete();
+      res.json({
+        message: "Board deleted",
+      });
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/v1/board/trash", async (req, res, next) => {
+  const userid = req.get("userid");
+  try {
+    const boards = await BoardModel.find({
+      owner: userid,
+      markedForDeletionAt: { $exists: true },
+    });
+    res.json(boards);
+    next();
   } catch (error) {
     next(error);
   }

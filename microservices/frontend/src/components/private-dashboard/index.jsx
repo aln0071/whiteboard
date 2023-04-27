@@ -139,7 +139,13 @@ export default function PrivateDashboard() {
                 />
                 Starred
               </li>
-              <li className="navigable-item">
+              <li
+                onClick={() => navigate("trash")}
+                className={
+                  "navigable-item" +
+                  (location.pathname === "/private/trash" ? " selected" : "")
+                }
+              >
                 <FontAwesomeIcon
                   icon={faTrashCan}
                   className="nav-item-icon"

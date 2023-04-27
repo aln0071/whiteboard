@@ -15,6 +15,7 @@ const BoardSchema = new Schema(
         timestamp: { type: Date, default: Date.now },
       },
     ],
+    markedForDeletionAt: { type: Date },
   },
   {
     timestamps: true,

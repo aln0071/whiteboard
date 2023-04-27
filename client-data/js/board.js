@@ -90,17 +90,17 @@ Tools.connect = function () {
   });
 
   this.socket.on("addQuestion", function broacastQuestionClient(questionData) {
-    var data = questionData.data
-    questionId = data.questionId
-    console.log("questions Client|", data)
+    var data = questionData.data;
+    questionId = data.questionId;
+    console.log("questions Client|", data);
     var text = document.createTextNode(data.data),
-      el = document.createElement('div')
+      el = document.createElement("div");
 
     var form = document.createElement("form");
     var element1 = document.createElement("input");
 
     form.method = "POST";
-    form.action = "javascript:handleAnswerSubmit(\'" + questionId + "\')";
+    form.action = "javascript:handleAnswerSubmit('" + questionId + "')";
 
     element1.id = questionId;
     form.appendChild(element1);
@@ -109,7 +109,11 @@ Tools.connect = function () {
     el.appendChild(text);
     el.appendChild(form);
     messages.appendChild(el);
-  })
+  });
+
+  this.socket.on("redirectToHome", function handleRedirectionToHome() {
+    window.location.href = "/";
+  });
 };
 
 Tools.connect();
@@ -264,9 +268,9 @@ Tools.register = function registerTool(newTool) {
   if (newTool.name in Tools.list) {
     console.log(
       "Tools.add: The tool '" +
-      newTool.name +
-      "' is already" +
-      "in the list. Updating it..."
+        newTool.name +
+        "' is already" +
+        "in the list. Updating it..."
     );
   }
 
@@ -617,10 +621,10 @@ Tools.toolHooks = [
       tool.listeners = {};
     }
     if (typeof tool.onstart !== "function") {
-      tool.onstart = function () { };
+      tool.onstart = function () {};
     }
     if (typeof tool.onquit !== "function") {
-      tool.onquit = function () { };
+      tool.onquit = function () {};
     }
   },
   function compileListeners(tool) {

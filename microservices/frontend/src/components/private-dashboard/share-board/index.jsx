@@ -15,10 +15,9 @@ function ShareBoard({ isOpen, closeModal, board }) {
   const [currentUser, setCurrentUser] = React.useState("");
 
   React.useEffect(() => {
-    console.log(board && board.name)
     if (board) {
       const url = URLS.BOARD_SHARING_OPTIONS.replace(":boardName", board.name);
-      axios.get(url).then(response => setUsers(response.data.subList));
+      axios.get(url).then((response) => setUsers(response.data.subList));
     }
   }, [board]);
 
@@ -31,7 +30,6 @@ function ShareBoard({ isOpen, closeModal, board }) {
       [currentUser]: "viewer",
     });
     setCurrentUser("");
-    console.log(users)
   };
 
   const handleSave = async () => {
@@ -47,7 +45,6 @@ function ShareBoard({ isOpen, closeModal, board }) {
     } catch (error) {
       toast.error(getErrorMessage(error));
     }
-    console.log(users)
   };
 
   return (
@@ -59,7 +56,6 @@ function ShareBoard({ isOpen, closeModal, board }) {
         <Modal.Body>
           Do not forget to save changes before closing the modal.
           <hr />
-
           <InputGroup className="mb-3">
             <Form.Control
               placeholder="Recipient's username"
