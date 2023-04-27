@@ -11,6 +11,9 @@ const { BoardSchema, UserSchema, QuestionSchema } = require("app-models");
 const BoardModel = mongoose.model("Board", BoardSchema);
 const UserModel = mongoose.model("User", UserSchema);
 const QuestionModel = mongoose.model("Question", QuestionSchema);
+const {
+  getUserIdFromCookie,
+} = require("./utils");
 
 app.use(express.json());
 
@@ -28,8 +31,10 @@ app.post("/api/v1/board/create/:boardname", async (req, res, next) => {
   try {
     const newBoard = new BoardModel();
     newBoard.name = boardname;
-    newBoard.owner = req.get("userid");
-    await newBoard.save();
+    newBoard.owner = await getUserIdFromCookie(req);
+    console.log("newBoard.owner : ", newBoard.owner)
+    const result = await newBoard.save();
+    res.send(result._id)
     res.sendStatus(200);
   } catch (error) {
     next(error);
@@ -68,7 +73,7 @@ app.post("/api/v1/board/answer", async (req, res, next) => {
   try {
     const newAnswer = {};
     newAnswer.answer = answer.description;
-    newAnswer.userId = answer.userId;
+    newAnswer.userId = await getUserIdFromCookie(req);
     const findboardCondition = {
       _id: answer.questionId,
     };
@@ -123,7 +128,7 @@ app.get("/api/v1/board/getusers/:boardname", async (req, res, next) => {
 });
 
 app.get("/api/v1/board/list", async (req, res, next) => {
-  const userid = req.get("userid");
+  const userid = await getUserIdFromCookie(req);
   try {
     const ownBoardsList = await BoardModel.find({ owner: userid }, [
       "name",
@@ -150,7 +155,7 @@ app.get("/api/v1/board/list", async (req, res, next) => {
 
 app.get("/api/v1/board/recent", async (req, res, next) => {
   try {
-    const userid = req.get("userid");
+    const userid = await getUserIdFromCookie(req);
     const userObjId = new mongoose.Types.ObjectId(userid);
     const boards = await BoardModel.aggregate([
       {
@@ -243,7 +248,7 @@ app.put("/api/v1/board/logs/write", async (req, res, next) => {
 
 app.get("/api/v1/board/logs/:id", async (req, res, next) => {
   const boardid = req.params.id;
-  const userid = req.get("userid");
+  const userid = await getUserIdFromCookie(req);
   try {
     const board = await BoardModel.findById(boardid, ["useractivity", "owner"]);
     if (board === null) {
@@ -259,7 +264,7 @@ app.get("/api/v1/board/logs/:id", async (req, res, next) => {
 });
 
 app.put("/api/v1/board/sharing/:id", async (req, res, next) => {
-  const userid = req.get("userid");
+  const userid = await getUserIdFromCookie(req);
   const boardid = req.params.id;
   try {
     const board = await BoardModel.findById(boardid);
