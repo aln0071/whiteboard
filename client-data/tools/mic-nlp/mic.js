@@ -13,6 +13,20 @@ const micTool = (function mic() {
     zoom: "toolID-Zoom",
   };
 
+  const colorMap = new Map();
+  colorMap.set("black", "#000000");
+  colorMap.set("red", "#FF4136");
+  colorMap.set("blue", "#0074D9");
+  colorMap.set("orange", "#FF851B");
+  colorMap.set("yellow", "#FFDC00");
+  colorMap.set("green", "#3D9970");
+  colorMap.set("light green", "#91E99B");
+  colorMap.set("purple", "#90468b");
+  colorMap.set("sky blue", "#7FDBFF");
+  colorMap.set("gray", "#AAAAAA");
+  colorMap.set("pink", "#E65194");
+
+
   var active = true;
   URL = window.URL || window.webkitURL;
   var gumStream;
@@ -27,7 +41,6 @@ const micTool = (function mic() {
 
 
   function stopRecording() {
-    console.log("stopButton clicked");
     rec.stop(); //stop microphone access 
     gumStream.getAudioTracks()[0].stop();
     //create the wav blob and pass it on to createDownloadLink 
@@ -48,7 +61,7 @@ const micTool = (function mic() {
       method: 'POST',
       body: data
     }
-    fetch("http://localhost:5000/extract-intent", options)
+    fetch("http://localhost:5000/extract-tool", options)
       .then(resp => resp.json())
       .then((data) => {
         console.log(data);
@@ -59,6 +72,19 @@ const micTool = (function mic() {
           document.getElementById(toolId['pencil'])?.click();
         }
 
+      }).catch((e) => {
+        console.log("error" + e);
+      })
+
+    fetch("http://localhost:5000/extract-color", options)
+      .then(resp => resp.json())
+      .then((data) => {
+        console.log(data);
+        color = data.color;
+        color_code = colorMap.get(color)
+        console.log(colorMap.get(color))
+        console.log(document.getElementById("chooseColor"))
+        document.getElementById("chooseColor").value = color_code
       }).catch((e) => {
         console.log("error" + e);
       })
@@ -83,7 +109,6 @@ const micTool = (function mic() {
       rec.record()
       console.log("Recording started");
       setTimeout(() => {
-        console.log("here");
         stopRecording();
       }, 5000);
     }).catch(function (err) {
@@ -94,7 +119,6 @@ const micTool = (function mic() {
 
 
   function listenToUser() {
-    console.log("ready");
     startRecording();
   }
 
