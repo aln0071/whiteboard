@@ -122,7 +122,7 @@
 		var span = document.getElementsByClassName("close")[0];
 
 		// When the user clicks the button, open the modal
-		if(btn) {
+		if (btn) {
 			btn.onclick = function () {
 				modal.style.display = "block";
 			}
@@ -143,6 +143,9 @@
 			var question = {};
 			question.questionId = 0
 			question.data = ""
+			var parts = window.location.href.split('/');
+			var lastSegment = parts.pop();
+			console.log(lastSegment)
 
 			await fetch('http://localhost:2000/api/v1/board/question', {
 				method: 'POST',
@@ -151,7 +154,7 @@
 				},
 				body: JSON.stringify({
 					'description': document.getElementById('searchterm').value,
-					'boardName': localStorage.getItem('Currentboard')
+					'boardName': lastSegment
 				})
 			})
 				.then((response) => response.json())
@@ -174,8 +177,7 @@
 				},
 				body: JSON.stringify({
 					'description': document.getElementById(questionId).value,
-					'questionId': questionId,
-					'userId': '640e23aafaa31b8b6e283cc5'
+					'questionId': questionId
 				})
 			})
 				.then((response) => response.json())

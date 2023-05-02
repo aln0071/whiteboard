@@ -8,10 +8,10 @@ import { toast } from "react-toastify";
 export default function AnswerResponses({ isOpen, closeModal, board }) {
   const [boards, setBoard] = React.useState([]);
 
-  const fetchData = async () => {
+  React.useEffect(() => {
     const url = URLS.FETCH_QUESTIONS;
     try {
-      const response = await axios
+      const response = axios
         .post(url, {
           questionId: board.name,
         })
@@ -28,10 +28,6 @@ export default function AnswerResponses({ isOpen, closeModal, board }) {
       console.trace(error);
       toast.error(getErrorMessage(error));
     }
-  };
-
-  React.useEffect(() => {
-    if (board?.name && isOpen) fetchData();
   }, [board]);
 
   return (
@@ -45,12 +41,12 @@ export default function AnswerResponses({ isOpen, closeModal, board }) {
           boards.map((data) => {
             return (
               <>
-                <h3>{data.question}</h3>
+                <h5>{data.question}</h5>
                 <Table>
                   {data.answerArray.map((answer) => {
                     return (
                       <tr>
-                        <td>{answer.userId}</td>
+                        <td>{answer.userId.username}</td>
                         <td>{answer.answer}</td>
                       </tr>
                     );

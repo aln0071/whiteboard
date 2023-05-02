@@ -89,7 +89,12 @@ app.post("/api/v1/board/fetchquestions", async (req, res, next) => {
       name: answer.questionId,
     };
     const question = await BoardModel.find(findboardCondition).populate(
-      "questions"
+      {
+        path: "questions",
+        populate: {
+          path: "answerArray.userId"
+        }
+      }
     );
     res.send(question);
   } catch (error) {
