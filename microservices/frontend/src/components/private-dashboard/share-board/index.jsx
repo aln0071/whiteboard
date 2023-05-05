@@ -17,11 +17,11 @@ function ShareBoard({ isOpen, closeModal, board }) {
   const autocompleteTimer = React.useRef(null);
 
   React.useEffect(() => {
-    if (board) {
+    if (isOpen) {
       const url = URLS.BOARD_SHARING_OPTIONS.replace(":boardName", board.name);
       axios.get(url).then((response) => setUsers(response.data.subList));
     }
-  }, [board]);
+  }, [isOpen]);
 
   const handleClose = () => closeModal();
 

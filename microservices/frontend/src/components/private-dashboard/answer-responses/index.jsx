@@ -8,27 +8,25 @@ import { toast } from "react-toastify";
 export default function AnswerResponses({ isOpen, closeModal, board }) {
   const [boards, setBoard] = React.useState([]);
 
-  React.useEffect(() => {
-    const url = URLS.FETCH_QUESTIONS;
+  const fetchAnswerResponses = async () => {
     try {
-      const response = axios
-        .post(url, {
-          questionId: board.name,
-        })
-        .then((data) => {
-          setBoard(data.data[0].questions);
-          console.log(data);
-        });
-      if (response.status === 200) {
-        toast.success("Fetching Questions");
-      } else {
+      const response = await axios.post(URLS.FETCH_QUESTIONS, {
+        questionId: board.name,
+      });
+      if (response.status !== 200) {
         throw new Error("Invalid status code: " + response.status);
       }
+      setBoard(response.data[0].questions);
     } catch (error) {
-      console.trace(error);
       toast.error(getErrorMessage(error));
     }
-  }, [board]);
+  };
+
+  React.useEffect(() => {
+    if (isOpen) {
+      fetchAnswerResponses();
+    }
+  }, [isOpen]);
 
   return (
     <Modal show={isOpen} onHide={() => closeModal()}>
