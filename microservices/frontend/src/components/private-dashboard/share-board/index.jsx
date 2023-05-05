@@ -7,9 +7,12 @@ import { URLS, getErrorMessage } from "../../../utils";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { AsyncTypeahead } from "react-bootstrap-typeahead";
+import { useSelector } from "react-redux";
 
 function ShareBoard({ isOpen, closeModal, board }) {
   const [users, setUsers] = React.useState({});
+
+  const loggedinUserId = useSelector((state) => state.user._id);
 
   const [autocompleteResults, setAutocompleteResults] = React.useState([]);
   const [isLoadingAutocomplete, setIsLoadingAutocomplete] =
@@ -85,7 +88,9 @@ function ShareBoard({ isOpen, closeModal, board }) {
                   }
                   setAutocompleteResults(
                     response.data.filter(
-                      (item) => users[item.username] === undefined
+                      (item) =>
+                        users[item.username] === undefined &&
+                        item._id !== loggedinUserId
                     )
                   );
                   setIsLoadingAutocomplete(false);
