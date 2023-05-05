@@ -18,6 +18,7 @@ export const URLS = {
   GET_TRASH_BOARDS: "/api/v1/board/trash",
   TOGGLE_TRASH: "/api/v1/board/delete/mark/:id",
   DELETE_FOREVER: "/api/v1/board/delete/:id",
+  AUTOCOMPLETE: "/api/v1/authentication/autocomplete/:name",
 };
 
 export const getErrorMessage = (error) =>

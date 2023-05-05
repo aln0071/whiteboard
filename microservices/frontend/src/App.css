@@ -569,3 +569,29 @@ body {
     justify-self: center;
     align-self: center;
 }
+
+.share-board-list-item {
+    display: grid;
+    grid-template-columns: 1fr 120px 120px;
+    white-space: nowrap;
+    align-items: center;
+}
+
+.share-board-type-dropdown button {
+    width: 100px;
+}
+
+.share-board-recipients-list > li {
+    margin-top: 5px;
+}
+
+.share-board-recipients-list > li:first-child {
+    margin-top: 10px
+}
+
+.share-board-recipient-email {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 5px;
+}

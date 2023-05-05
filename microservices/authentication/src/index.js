@@ -248,6 +248,20 @@ app.post("/api/v1/authentication/toggleStarred/:id", async (req, res, next) => {
   next();
 });
 
+app.get("/api/v1/authentication/autocomplete/:name", async (req, res, next) => {
+  try {
+    const name = req.params.name;
+    const regexp = new RegExp("^" + name);
+    const users = await UserModel.find({ username: regexp }, "username").limit(
+      5
+    );
+    res.json(users);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use((err, req, res, next) => {
   res.status(500);
   console.trace(err);

@@ -1,18 +1,20 @@
 import * as React from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import InputGroup from "react-bootstrap/InputGroup";
-import Form from "react-bootstrap/Form";
 import Dropdown from "react-bootstrap/Dropdown";
 import DropdownButton from "react-bootstrap/DropdownButton";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
 import { URLS, getErrorMessage } from "../../../utils";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { AsyncTypeahead } from "react-bootstrap-typeahead";
 
 function ShareBoard({ isOpen, closeModal, board }) {
   const [users, setUsers] = React.useState({});
-  const [currentUser, setCurrentUser] = React.useState("");
+
+  const [autocompleteResults, setAutocompleteResults] = React.useState([]);
+  const [isLoadingAutocomplete, setIsLoadingAutocomplete] =
+    React.useState(false);
+  const autocompleteTimer = React.useRef(null);
 
   React.useEffect(() => {
     if (board) {
@@ -23,13 +25,12 @@ function ShareBoard({ isOpen, closeModal, board }) {
 
   const handleClose = () => closeModal();
 
-  const handleAddUser = () => {
-    if (currentUser.trim() === "") return;
+  const handleAddUser = (username) => {
+    if (username.trim() === "") return;
     setUsers({
       ...users,
-      [currentUser]: "viewer",
+      [username]: "viewer",
     });
-    setCurrentUser("");
   };
 
   const handleSave = async () => {
@@ -56,31 +57,60 @@ function ShareBoard({ isOpen, closeModal, board }) {
         <Modal.Body>
           Do not forget to save changes before closing the modal.
           <hr />
-          <InputGroup className="mb-3">
-            <Form.Control
-              placeholder="Recipient's username"
-              aria-label="Recipient's username"
-              aria-describedby="basic-addon2"
-              value={currentUser}
-              onChange={(e) => setCurrentUser(e.target.value)}
-            />
-            <Button
-              variant="outline-secondary"
-              id="button-addon2"
-              onClick={handleAddUser}
-            >
-              Add
-            </Button>
-          </InputGroup>
-          <ul>
+          <AsyncTypeahead
+            filterBy={() => true}
+            id="recipient-name-autocomplete"
+            onChange={(selectedItem) => {
+              handleAddUser(selectedItem[0].username);
+            }}
+            isLoading={isLoadingAutocomplete}
+            selected={[]}
+            onSearch={async (query) => {
+              const timerId = autocompleteTimer.current;
+              clearTimeout(timerId);
+              autocompleteTimer.current = setTimeout(async () => {
+                try {
+                  const queryValue = String(query).trim();
+                  if (queryValue === "") {
+                    setAutocompleteResults([]);
+                    setIsLoadingAutocomplete(false);
+                    return;
+                  }
+                  setIsLoadingAutocomplete(true);
+                  const response = await axios.get(
+                    URLS.AUTOCOMPLETE.replace(":name", queryValue)
+                  );
+                  if (response.status !== 200) {
+                    throw new Error("Invalid status");
+                  }
+                  setAutocompleteResults(
+                    response.data.filter(
+                      (item) => users[item.username] === undefined
+                    )
+                  );
+                  setIsLoadingAutocomplete(false);
+                } catch (error) {
+                  console.error(error);
+                  setIsLoadingAutocomplete(false);
+                  setAutocompleteResults([]);
+                }
+              }, 300);
+            }}
+            options={autocompleteResults}
+            labelKey="username"
+            placeholder="Recipient's username"
+          />
+          <ul className="share-board-recipients-list">
             {Object.keys(users).map((username) => {
               const role = users[username];
               return (
                 <li key={username}>
-                  {username}
-                  <ButtonGroup>
+                  <div className="share-board-list-item">
+                    <span className="share-board-recipient-email">
+                      {username}
+                    </span>
                     <DropdownButton
-                      title={role}
+                      title={role === "editor" ? "Editor" : "Viewer"}
                       onClick={(e) => {
                         e.preventDefault();
                         const value = e.target.getAttribute("value");
@@ -91,6 +121,7 @@ function ShareBoard({ isOpen, closeModal, board }) {
                           });
                         }
                       }}
+                      className="share-board-type-dropdown"
                     >
                       <Dropdown.Item
                         href="#/action-1"
@@ -117,7 +148,7 @@ function ShareBoard({ isOpen, closeModal, board }) {
                     >
                       Remove User
                     </Button>
-                  </ButtonGroup>
+                  </div>
                 </li>
               );
             })}
