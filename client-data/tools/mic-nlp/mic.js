@@ -82,8 +82,6 @@ const micTool = (function mic() {
         console.log(data);
         color = data.color;
         color_code = colorMap.get(color)
-        console.log(colorMap.get(color))
-        console.log(document.getElementById("chooseColor"))
         document.getElementById("chooseColor").value = color_code
       }).catch((e) => {
         console.log("error" + e);
