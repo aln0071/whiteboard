@@ -101,14 +101,12 @@ app.post("/api/v1/board/fetchquestions", async (req, res, next) => {
     const findboardCondition = {
       name: answer.questionId,
     };
-    const question = await BoardModel.find(findboardCondition).populate(
-      {
-        path: "questions",
-        populate: {
-          path: "answerArray.userId"
-        }
-      }
-    );
+    const question = await BoardModel.find(findboardCondition).populate({
+      path: "questions",
+      populate: {
+        path: "answerArray.userId",
+      },
+    });
     res.send(question);
   } catch (error) {
     next(error);
@@ -290,7 +288,10 @@ app.get("/api/v1/board/logs/:id", async (req, res, next) => {
   const boardid = req.params.id;
   const userid = req.get("userid");
   try {
-    const board = await BoardModel.findById(boardid, ["useractivity", "owner"]);
+    const board = await BoardModel.findById(boardid, [
+      "useractivity",
+      "owner",
+    ]).populate("useractivity.userid", "username");
     if (board === null) {
       throw new Error("Invalid board id");
     } else if (String(board.owner).localeCompare(userid) !== 0) {

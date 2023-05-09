@@ -12,7 +12,6 @@ import {
 import Register from "./components/register";
 import PublicDashboard from "./components/public-dashboard";
 import PrivateDashboard from "./components/private-dashboard";
-import Search from "./components/private-dashboard/search";
 import axios from "axios";
 import { URLS } from "./utils";
 import BoardsList from "./components/private-dashboard/boards-list";
@@ -98,8 +97,8 @@ const router = createBrowserRouter([
       },
       {
         path: "search",
-        element: <BoardsList tab="search" />
-      }
+        element: <BoardsList tab="search" />,
+      },
     ],
   },
 ]);

@@ -5,16 +5,37 @@ import axios from "axios";
 import { URLS } from "../../../utils";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
+import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
+import AnalyticsChart from "./AnalyticsChart";
+import Table from "react-bootstrap/Table";
 
 let useractivity = [];
 
 export default function Analytics({ isOpen, closeModal, board }) {
   const handleClose = () => closeModal();
+  const [tab, setTab] = React.useState("table");
 
   const [fromDatetime, setFromDatetime] = React.useState("");
   const [toDatetime, setToDatetime] = React.useState("");
 
   const [analyticsSummary, setAnalyticsSummary] = React.useState({});
+
+  const [userActivityData, setUserActivityData] = React.useState([]);
+
+  const userActivityTimestampFilter = () => {
+    const fromLimit = new Date(fromDatetime);
+    const toLimit = new Date(toDatetime);
+    return ({ timestamp }) => {
+      if (!isNaN(fromLimit) && timestamp < fromLimit) {
+        return false;
+      }
+      if (!isNaN(toLimit) && timestamp > toLimit) {
+        return false;
+      }
+      return true;
+    };
+  };
 
   function generateSummaryFromUserActivity() {
     const summary = {};
@@ -22,39 +43,38 @@ export default function Analytics({ isOpen, closeModal, board }) {
     const fromLimit = new Date(fromDatetime);
     const toLimit = new Date(toDatetime);
     useractivity
-      .filter(({ timestamp }) => {
-        const ts = new Date(timestamp);
-        if (!isNaN(fromLimit) && ts < fromLimit) {
-          return false;
-        }
-        if (!isNaN(toLimit) && ts > toLimit) {
-          return false;
-        }
-        return true;
-      })
+      .filter(userActivityTimestampFilter())
       .forEach(({ userid, timestamp, activitytype }) => {
         if (activitytype === "joinboard") {
           if (!activityTracker.has(userid)) {
-            activityTracker.set(userid, new Date(timestamp));
-            summary[userid] = {
-              duration: 0,
-              active: false,
-            };
+            activityTracker.set(userid, { timestamp, count: 1 });
+            if (summary[userid] === undefined) {
+              summary[userid] = {
+                duration: 0,
+                active: false,
+              };
+            }
+          } else {
+            const track = activityTracker.get(userid);
+            track.count += 1;
           }
         } else if (activitytype === "disconnection") {
           if (activityTracker.has(userid)) {
-            const milliseconds =
-              new Date(timestamp) - activityTracker.get(userid);
+            const track = activityTracker.get(userid);
+            track.count -= 1;
+            // if (track.count === 0) {
+            const milliseconds = timestamp - track.timestamp;
             summary[userid].duration =
-              summary[userid]?.duration || 0 + milliseconds;
+              (summary[userid]?.duration || 0) + milliseconds;
             activityTracker.delete(userid);
+            // }
           }
         }
       });
     Object.keys(summary).forEach((userid) => {
       const object = summary[userid];
       if (activityTracker.has(userid)) {
-        object.duration += Date.now() - activityTracker.get(userid);
+        object.duration += Date.now() - activityTracker.get(userid).timestamp;
         object.active = true;
       }
       const milliseconds = object.duration;
@@ -87,9 +107,13 @@ export default function Analytics({ isOpen, closeModal, board }) {
         URLS.GET_BOARD_ANALYTICS.replace(":id", board._id)
       );
       useractivity = response.data.useractivity || [];
-      useractivity.sort(
-        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-      );
+      useractivity = useractivity.map((activity) => ({
+        ...activity,
+        timestamp: new Date(activity.timestamp),
+        userid: activity.userid.username,
+      }));
+      useractivity.sort((a, b) => a.timestamp - b.timestamp);
+      setUserActivityData(useractivity);
       generateSummaryFromUserActivity();
     }
     if (isOpen === true) {
@@ -157,34 +181,47 @@ export default function Analytics({ isOpen, closeModal, board }) {
             </Button>
           </div>
           <hr />
-          <table className="analytics-table">
-            <thead>
-              <tr>
-                <th>User ID</th>
-                <th>Duration (HH:MM:SS)</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.keys(analyticsSummary).map((userid) => {
-                const analyticsOfUser = analyticsSummary[userid];
-                return (
-                  <tr key={userid}>
-                    <td>{userid}</td>
-                    <td>{analyticsOfUser.duration}</td>
-                    <td>{analyticsOfUser.active ? "active" : "inactive"} </td>
+          <Tabs activeKey={tab} onSelect={(t) => setTab(t)} id="analytics-tabs">
+            <Tab eventKey="table" title="Table">
+              <Table striped bordered hover className="analytics-table">
+                <thead>
+                  <tr>
+                    <th>User ID</th>
+                    <th>Duration (HH:MM:SS)</th>
+                    <th>Status</th>
                   </tr>
-                );
-              })}
-              {Object.keys(analyticsSummary).length === 0 && (
-                <tr>
-                  <td colSpan={3} style={{ textAlign: "center" }}>
-                    No data found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {Object.keys(analyticsSummary).map((userid) => {
+                    const analyticsOfUser = analyticsSummary[userid];
+                    return (
+                      <tr key={userid}>
+                        <td>{userid}</td>
+                        <td>{analyticsOfUser.duration}</td>
+                        <td>
+                          {analyticsOfUser.active ? "active" : "inactive"}{" "}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {Object.keys(analyticsSummary).length === 0 && (
+                    <tr>
+                      <td colSpan={3} style={{ textAlign: "center" }}>
+                        No data found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </Tab>
+            <Tab eventKey="chart" title="Chart">
+              <div className="chart-container">
+                <AnalyticsChart
+                  data={userActivityData.filter(userActivityTimestampFilter())}
+                />
+              </div>
+            </Tab>
+          </Tabs>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>

@@ -95,6 +95,11 @@ export default function BoardsList({ tab }) {
     initializeData();
   }, [tab]);
 
+  const csb = {
+    _id: "645a7f8eb472fe753433a806",
+    name: "rybu0yS06k7jQiLAhHUV6EGzCvjt-bVrnJClEDCAAlo-",
+    owner: "6435a5000dc2cfd874b3822e",
+  };
   const [currentSelectedBoard, setCurrentSelectedBoard] = React.useState();
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [showAnswerResponses, setShowAnswerResponses] = React.useState(false);
@@ -158,6 +163,9 @@ export default function BoardsList({ tab }) {
 
   const [contextMenuStyles, setContextMenuStyles] = React.useState({});
   const renderBoardsList = (boards) => {
+    if (boards.length === 0) {
+      return <div className="no-boards">No boards found</div>;
+    }
     return (
       <div className="boards-list-container">
         <>
