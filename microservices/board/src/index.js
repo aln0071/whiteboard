@@ -85,9 +85,11 @@ app.post("/api/v1/board/answer", async (req, res, next) => {
 app.post("/api/v1/board/search", async (req, res, next) => {
   var search = req.body.searchKey;
   try {
-    searchResults = await BoardModel.find({ "name": { $regex: search, $options: 'i' } }, ["name", "owner"]);
-    console.log(searchResults)
-    res.send(searchResults);
+    var searchResults = await BoardModel.find({ "name": { $regex: search, $options: 'i' } }, ["_id"]);
+    var searchArray = []
+    searchResults.map(result => searchArray.push(result._id))
+    console.log(searchArray)
+    res.send(searchArray);
   } catch (error) {
     next(error);
   }

@@ -1,4 +1,4 @@
-import { SET_USER_DETAILS, SET_USER_IMAGE, SET_SEARCH, SET_SEARCH_RESULTS } from "../actions/types";
+import { SET_USER_DETAILS, SET_USER_IMAGE } from "../actions/types";
 
 const initialState = {
   _id: "",
@@ -19,16 +19,6 @@ export default function user(state = initialState, action) {
       return {
         ...state,
         image: payload,
-      };
-    case SET_SEARCH:
-      return {
-        ...state,
-        searchCriteria: payload,
-      };
-    case SET_SEARCH_RESULTS:
-      return {
-        ...state,
-        searchResults: [...payload],
       };
     default:
       return state;

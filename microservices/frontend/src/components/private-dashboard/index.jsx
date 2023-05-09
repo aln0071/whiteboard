@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../utils";
 import CreateNewBoardModal from "./create-new-board";
 import ChatBot from "./chatbot";
-import { setSearchCriteria, setSearchResults } from "../../redux/actions/user";
+import { setSearchResults } from "../../redux/actions/search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUserFriends,
@@ -44,7 +44,6 @@ export default function PrivateDashboard() {
   const profileImageUrl = useSelector((state) => state.user.image);
 
   const searchForBoards = () => {
-    dispatch(setSearchCriteria(searchkey));
     dispatch(setSearchResults(searchkey));
     navigate("search")
   }
