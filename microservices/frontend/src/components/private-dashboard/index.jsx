@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { getErrorMessage, URLS } from "../../utils";
 import CreateNewBoardModal from "./create-new-board";
 import ChatBot from "./chatbot";
+import { setSearchCriteria, setSearchResults } from "../../redux/actions/user";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUserFriends,
@@ -18,11 +19,13 @@ import {
   faUser,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function PrivateDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const [searchkey, setSearchKey] = React.useState("")
 
   const logout = async () => {
     try {
@@ -39,6 +42,12 @@ export default function PrivateDashboard() {
 
   const [showNewBoardModal, setShowNewBoardModal] = React.useState(false);
   const profileImageUrl = useSelector((state) => state.user.image);
+
+  const searchForBoards = () => {
+    dispatch(setSearchCriteria(searchkey));
+    dispatch(setSearchResults(searchkey));
+    navigate("search")
+  }
 
   return (
     <>
@@ -57,9 +66,10 @@ export default function PrivateDashboard() {
                 placeholder="Search in CWB"
                 aria-label="Search in CWB"
                 aria-describedby="basic-addon2"
+                onChange={e => setSearchKey(e.target.value)}
                 className={"shadow-none"}
               />
-              <Button variant="outline-secondary">Search</Button>
+              <Button variant="outline-secondary" onClick={() => searchForBoards()}>Search</Button>
             </InputGroup>
             <span className="profile-icon">
               <img src={profileImageUrl} />

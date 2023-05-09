@@ -37,6 +37,7 @@ export default function BoardsList({ tab }) {
   //   viewerBoards: [],
   // });
   const boardsList = useSelector((state) => state.boards);
+  const searchList = useSelector((state) => state.user.searchResults);
   const [recentBoardsList, setRecentBoardsList] = React.useState([]);
   const [trashBoardsList, setTrashBoardsList] = React.useState([]);
 
@@ -377,7 +378,11 @@ export default function BoardsList({ tab }) {
   };
   if (tab === "my-boards") {
     return renderBoardsList(boardsList.ownBoards);
-  } else if (tab === "shared-with-me") {
+  }
+  else if (tab === "search") {
+    return renderBoardsList(searchList);
+  }
+  else if (tab === "shared-with-me") {
     return renderBoardsList([
       ...boardsList.editorBoards,
       ...boardsList.viewerBoards,
