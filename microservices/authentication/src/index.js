@@ -171,7 +171,7 @@ app.post("/api/v1/authentication/login", async (req, res, next) => {
         _id: user._id,
       });
       res.cookie("jwtToken", accessToken, {
-        secure: true,
+        secure: false,
         maxAge: 15 * 60 * 1000,
         httpOnly: true,
       });

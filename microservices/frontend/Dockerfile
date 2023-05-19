@@ -10,6 +10,7 @@ ADD . /app/
 
 RUN npm i -g webpack-dev-server
 RUN npm i -g webpack-cli
+RUN npm i
 
 # Add `/app/node_modules/.bin` to $PATH
 ENV PATH /app/node_modules/.bin:$PATH
