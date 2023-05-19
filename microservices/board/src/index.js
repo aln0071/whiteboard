@@ -66,7 +66,7 @@ app.post("/api/v1/board/answer", async (req, res, next) => {
   try {
     const newAnswer = {};
     newAnswer.answer = answer.description;
-    newAnswer.userId = req.get("userid");
+    newAnswer.userId = new mongoose.Types.ObjectId(req.get("userid"));
     const findboardCondition = {
       _id: answer.questionId,
     };
@@ -82,20 +82,36 @@ app.post("/api/v1/board/answer", async (req, res, next) => {
   }
 });
 
+app.post("/api/v1/board/search", async (req, res, next) => {
+  var search = req.body.searchKey;
+  try {
+    var searchResults = await BoardModel.find(
+      { name: { $regex: search, $options: "i" } },
+      ["_id"]
+    );
+    var searchArray = [];
+    searchResults.map((result) => searchArray.push(result._id));
+    res.send(searchArray);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.post("/api/v1/board/fetchquestions", async (req, res, next) => {
-  const answer = req.body;
+  const { questionId: boardname } = req.body;
   try {
     const findboardCondition = {
-      name: answer.questionId,
+      name: boardname,
     };
-    const question = await BoardModel.find(findboardCondition).populate(
-      {
-        path: "questions",
-        populate: {
-          path: "answerArray.userId"
-        }
-      }
-    );
+    const question = await BoardModel.find(findboardCondition, [
+      "questions",
+    ]).populate({
+      path: "questions",
+      populate: {
+        path: "answerArray.userId",
+        select: "username",
+      },
+    });
     res.send(question);
   } catch (error) {
     next(error);
@@ -277,7 +293,10 @@ app.get("/api/v1/board/logs/:id", async (req, res, next) => {
   const boardid = req.params.id;
   const userid = req.get("userid");
   try {
-    const board = await BoardModel.findById(boardid, ["useractivity", "owner"]);
+    const board = await BoardModel.findById(boardid, [
+      "useractivity",
+      "owner",
+    ]).populate("useractivity.userid", "username");
     if (board === null) {
       throw new Error("Invalid board id");
     } else if (String(board.owner).localeCompare(userid) !== 0) {

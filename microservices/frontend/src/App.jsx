@@ -95,6 +95,10 @@ const router = createBrowserRouter([
         path: "trash",
         element: <BoardsList tab="trash" />,
       },
+      {
+        path: "search",
+        element: <BoardsList tab="search" />,
+      },
     ],
   },
 ]);

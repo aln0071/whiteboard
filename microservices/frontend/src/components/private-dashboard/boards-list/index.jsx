@@ -37,6 +37,7 @@ export default function BoardsList({ tab }) {
   //   viewerBoards: [],
   // });
   const boardsList = useSelector((state) => state.boards);
+  const searchList = useSelector((state) => state.search.searchResults);
   const [recentBoardsList, setRecentBoardsList] = React.useState([]);
   const [trashBoardsList, setTrashBoardsList] = React.useState([]);
 
@@ -94,6 +95,11 @@ export default function BoardsList({ tab }) {
     initializeData();
   }, [tab]);
 
+  const csb = {
+    _id: "645a7f8eb472fe753433a806",
+    name: "rybu0yS06k7jQiLAhHUV6EGzCvjt-bVrnJClEDCAAlo-",
+    owner: "6435a5000dc2cfd874b3822e",
+  };
   const [currentSelectedBoard, setCurrentSelectedBoard] = React.useState();
   const [showShareModal, setShowShareModal] = React.useState(false);
   const [showAnswerResponses, setShowAnswerResponses] = React.useState(false);
@@ -157,6 +163,9 @@ export default function BoardsList({ tab }) {
 
   const [contextMenuStyles, setContextMenuStyles] = React.useState({});
   const renderBoardsList = (boards) => {
+    if (boards.length === 0) {
+      return <div className="no-boards">No boards found</div>;
+    }
     return (
       <div className="boards-list-container">
         <>
@@ -377,7 +386,15 @@ export default function BoardsList({ tab }) {
   };
   if (tab === "my-boards") {
     return renderBoardsList(boardsList.ownBoards);
-  } else if (tab === "shared-with-me") {
+  }
+  else if (tab === "search") {
+    return renderBoardsList([
+      ...boardsList.ownBoards,
+      ...boardsList.editorBoards,
+      ...boardsList.viewerBoards,
+    ].filter((board) => searchList.includes(board._id)));
+  }
+  else if (tab === "shared-with-me") {
     return renderBoardsList([
       ...boardsList.editorBoards,
       ...boardsList.viewerBoards,

@@ -44,7 +44,7 @@ export default function AnswerResponses({ isOpen, closeModal, board }) {
                   {data.answerArray.map((answer) => {
                     return (
                       <tr>
-                        <td>{answer.userId.username}</td>
+                        <td>{answer.userId?.username}</td>
                         <td>{answer.answer}</td>
                       </tr>
                     );
